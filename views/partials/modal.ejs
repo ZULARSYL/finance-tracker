@@ -20,7 +20,6 @@
                             </label>
                             <select class="form-select" name="kategori">
                                 <option value="Gaji">Gaji</option>
-                                <option value="Tabungan">Tabungan</option>
                                 <option value="Lembur">Lembur</option>
                                 <option value="Tambahan">Tambahan</option>
                             </select>
@@ -105,6 +104,7 @@
                                 <option value="Belanja">Belanja</option>
                                 <option value="Pendidikan">Pendidikan</option>
                                 <option value="Hiburan">Hiburan</option>
+                                <option value="Tabungan">Tabungan</option>
                             </select>
                             <input type="hidden" name="jenis" value="Pengeluaran">
                         </div>
@@ -269,6 +269,120 @@
         </div>
     </div>
 </div>
+
+<!-- modal budgeting -->
+<% const budgetRatios = typeof ratios !== 'undefined' ? ratios : { primer: 50, sekunder: 30, tabungan: 20 }; %>
+<div class="modal fade" id="budgetModal">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Atur Rasio Budget
+                </h5>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <form action="/budgeting/ratio" method="POST">
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Primer (%)
+                        </label>
+                        <input type="number" name="primer" class="form-control" value="<%= budgetRatios.primer %>" min="0" max="100">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Sekunder (%)
+                        </label>
+                        <input type="number" name="sekunder" class="form-control" value="<%= budgetRatios.sekunder %>" min="0" max="100">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Tabungan (%)
+                        </label>
+                        <input type="number" name="tabungan" class="form-control" value="<%= budgetRatios.tabungan %>" min="0" max="100">
+                    </div>
+
+                    <div class="alert alert-success rounded-4">
+                        Total rasio harus berjumlah 100%.
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button class="btn btn-budget" type="submit">
+                        Simpan Rasio
+                    </button>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- modal goal nabung -->
+<div class="modal fade" id="goalModal">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Atur Goal Menabung
+                </h5>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <form action="/budgeting/goal" method="POST">
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Nama Goal
+                        </label>
+                        <input type="text" name="title" class="form-control" value="<%= typeof goalTitle !== 'undefined' ? goalTitle : 'Target Menabung' %>">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Target Menabung (Rp)
+                        </label>
+                        <input type="number" name="target" class="form-control" value="<%= typeof goalTarget !== 'undefined' ? goalTarget : 0 %>" min="0">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button class="btn btn-budget" type="submit">
+                        Simpan Goal
+                    </button>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
 
 <script>
 // Format rupiah untuk pemasukan

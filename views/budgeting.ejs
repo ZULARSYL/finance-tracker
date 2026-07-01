@@ -4,26 +4,11 @@
     border-radius:24px;
     padding:24px;
     box-shadow:0 4px 20px rgba(0,0,0,.05);
-    border:none;
-}
-
-.budget-icon{
-    width:60px;
-    height:60px;
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    margin-bottom:15px;
 }
 
 .btn-budget{
-    background:var(--primary);
-    color:white;
-    border:none;
-    border-radius:12px;
-    padding:10px 20px;
+    background: var(--primary);
+    color: white;
 }
 
 .btn-budget:hover{
@@ -33,43 +18,33 @@
 
 .progress{
     height:12px;
+}
+
+.progress-bar{
     border-radius:50px;
-    background:#eef2f3;
 }
 
-.budget-primary{
-    background:var(--primary);
-}
-
-.recommend-box{
-    background:#fafafa;
-    border-radius:18px;
-    padding:20px;
-    height:100%;
-    transition:.3s;
-}
-
-.recommend-box:hover{
-    transform:translateY(-4px);
+.form-control:focus{
+    border-color: var(--primary);
+    box-shadow: 0 0 0 .25rem rgba(10,92,21,.15);
 }
 </style>
 <div class="container-fluid py-4">
-
-    <!-- PAGE HEADER -->
+    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h2 class="fw-bold mb-1">
-                Budgeting
-            </h2>
+            <h2 class="fw-bold mb-1">Budgeting</h2>
             <p class="text-muted mb-0">
-                Pantau dan optimalkan pengeluaran bulananmu.
+                Budget otomatis dihitung berdasarkan total pemasukan bulan ini untuk <%= currentMonthLabel %>.
             </p>
         </div>
 
-        <button class="btn btn-budget">
-            <i class="bi bi-plus-lg me-2"></i>
-            Buat Budget Baru
+        <button class="btn btn-budget"
+                data-bs-toggle="modal"
+                data-bs-target="#budgetModal">
+            <i class="bi bi-sliders me-2"></i>
+            Atur Rasio Budget
         </button>
 
     </div>
@@ -77,32 +52,56 @@
     <!-- SUMMARY -->
     <div class="row g-4 mb-4">
 
-        <div class="col-md-4">
-
+        <!-- TOTAL INCOME -->
+        <div class="col-lg-3 col-md-6">
             <div class="budget-card">
 
-                <div class="budget-icon bg-success-subtle">
+                <div class="budget-icon bg-success-subtle text-success">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+
+                <p class="text-muted mb-2">Total Pemasukan</p>
+
+                <h4 class="fw-bold text-success">
+                    Rp <%= totalIncome.toLocaleString('id-ID') %>
+                </h4>
+
+                <small class="text-muted">
+                    <%= transactions.filter(t => t.jenis === 'Pemasukan').length %> transaksi pemasukan bulan ini
+                </small>
+
+            </div>
+        </div>
+
+        <!-- TOTAL BUDGET -->
+        <div class="col-lg-3 col-md-6">
+            <div class="budget-card">
+
+                <div class="budget-icon bg-primary-subtle text-primary">
                     <i class="bi bi-wallet2"></i>
                 </div>
 
                 <p class="text-muted mb-2">
-                    Budget Bulan Ini
+                    Budget Otomatis
                 </p>
 
                 <h4 class="fw-bold">
-                    Rp 5.000.000
+                    Rp <%= totalBudget.toLocaleString('id-ID') %>
                 </h4>
 
-            </div>
+                <small class="text-muted">
+                    Menggunakan rasio <%= ratios.primer %>:<%= ratios.sekunder %>:<%= ratios.tabungan %>
+                </small>
 
+            </div>
         </div>
 
-        <div class="col-md-4">
-
+        <!-- USED -->
+        <div class="col-lg-3 col-md-6">
             <div class="budget-card">
 
-                <div class="budget-icon bg-warning-subtle">
-                    <i class="bi bi-bar-chart"></i>
+                <div class="budget-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-bar-chart-line"></i>
                 </div>
 
                 <p class="text-muted mb-2">
@@ -110,18 +109,21 @@
                 </p>
 
                 <h4 class="fw-bold">
-                    Rp 3.200.000
+                    Rp <%= usedTotal.toLocaleString('id-ID') %>
                 </h4>
 
-            </div>
+                <small class="text-muted">
+                    <%= usagePercent.toFixed(1) %>% dari total budget
+                </small>
 
+            </div>
         </div>
 
-        <div class="col-md-4">
-
+        <!-- REMAINING -->
+        <div class="col-lg-3 col-md-6">
             <div class="budget-card">
 
-                <div class="budget-icon bg-primary-subtle">
+                <div class="budget-icon bg-success-subtle text-success">
                     <i class="bi bi-piggy-bank"></i>
                 </div>
 
@@ -130,16 +132,56 @@
                 </p>
 
                 <h4 class="fw-bold text-success">
-                    Rp 1.800.000
+                    Rp <%= remaining.toLocaleString('id-ID') %>
                 </h4>
 
+                <small class="text-muted">
+                    Masih tersedia bulan ini
+                </small>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DISTRIBUTION -->
+    <div class="budget-card mb-4">
+
+        <h5 class="fw-bold mb-4">
+            Distribusi Otomatis Budget
+        </h5>
+
+        <div class="row text-center">
+
+            <div class="col-md-4">
+                <h1 class="fw-bold text-success"><%= ratios.primer %>%</h1>
+                <p class="mb-1">Primer</p>
+                <small class="text-muted">
+                    Rp <%= allocation.primer.toLocaleString('id-ID') %>
+                </small>
+            </div>
+
+            <div class="col-md-4">
+                <h1 class="fw-bold text-warning"><%= ratios.sekunder %>%</h1>
+                <p class="mb-1">Sekunder</p>
+                <small class="text-muted">
+                    Rp <%= allocation.sekunder.toLocaleString('id-ID') %>
+                </small>
+            </div>
+
+            <div class="col-md-4">
+                <h1 class="fw-bold text-primary"><%= ratios.tabungan %>%</h1>
+                <p class="mb-1">Tabungan</p>
+                <small class="text-muted">
+                    Rp <%= allocation.tabungan.toLocaleString('id-ID') %>
+                </small>
             </div>
 
         </div>
 
     </div>
 
-    <!-- BUDGET CATEGORY -->
+    <!-- ALLOCATION -->
     <div class="row g-4 mb-4">
 
         <div class="col-lg-8">
@@ -147,65 +189,80 @@
             <div class="budget-card">
 
                 <h5 class="fw-bold mb-4">
-                    Alokasi Budget Bulanan
+                    Progress Penggunaan Budget
                 </h5>
 
-                <!-- Primer -->
+                <!-- PRIMER -->
                 <div class="mb-4">
 
                     <div class="d-flex justify-content-between mb-2">
-                        <span>Primer</span>
-                        <span>65%</span>
+                        <span class="fw-semibold">
+                            Primer
+                        </span>
+
+                        <span>
+                            Rp <%= used.primer.toLocaleString('id-ID') %> / Rp <%= allocation.primer.toLocaleString('id-ID') %>
+                        </span>
                     </div>
 
-                    <div class="progress">
+                    <div class="progress mb-2">
                         <div class="progress-bar budget-primary"
-                             style="width:65%">
+                             data-width="<%= progressPrimerPercent.toFixed(0) %>">
                         </div>
                     </div>
 
                     <small class="text-muted">
-                        Makan, Transportasi, Komunikasi
+                        Makan, Transportasi, Komunikasi, Pendidikan
                     </small>
 
                 </div>
 
-                <!-- Sekunder -->
+                <!-- SEKUNDER -->
                 <div class="mb-4">
 
                     <div class="d-flex justify-content-between mb-2">
-                        <span>Sekunder</span>
-                        <span>20%</span>
+                        <span class="fw-semibold">
+                            Sekunder
+                        </span>
+
+                        <span>
+                            Rp <%= used.sekunder.toLocaleString('id-ID') %> / Rp <%= allocation.sekunder.toLocaleString('id-ID') %>
+                        </span>
                     </div>
 
-                    <div class="progress">
+                    <div class="progress mb-2">
                         <div class="progress-bar bg-warning"
-                             style="width:20%">
+                             data-width="<%= progressSekunderPercent.toFixed(0) %>">
                         </div>
                     </div>
 
                     <small class="text-muted">
-                        Hiburan, Olahraga
+                        Hiburan, Olahraga, Belanja
                     </small>
 
                 </div>
 
-                <!-- Tersier -->
+                <!-- TABUNGAN -->
                 <div>
 
                     <div class="d-flex justify-content-between mb-2">
-                        <span>Tersier</span>
-                        <span>15%</span>
+                        <span class="fw-semibold">
+                            Tabungan
+                        </span>
+
+                        <span>
+                            Rp <%= used.tabungan.toLocaleString('id-ID') %> / Rp <%= allocation.tabungan.toLocaleString('id-ID') %>
+                        </span>
                     </div>
 
-                    <div class="progress">
-                        <div class="progress-bar bg-danger"
-                             style="width:15%">
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-info"
+                             data-width="<%= progressTabunganPercent.toFixed(0) %>">
                         </div>
                     </div>
 
                     <small class="text-muted">
-                        Belanja dan kebutuhan tambahan
+                        Tabungan, Investasi, Dana Darurat
                     </small>
 
                 </div>
@@ -219,33 +276,39 @@
 
             <div class="budget-card h-100">
 
-                <h5 class="fw-bold mb-4">
-                    Goal Menabung
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">
+                        Goal Menabung
+                    </h5>
+
+                    <button class="btn btn-success rounded-circle" data-bs-toggle="modal" data-bs-target="#goalModal">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
 
                 <h3 class="fw-bold">
-                    Laptop Baru
+                    <%= goalTitle %>
                 </h3>
 
                 <p class="text-muted">
-                    Target Rp 15.000.000
+                    Target Rp <%= goalTarget.toLocaleString('id-ID') %>
                 </p>
 
                 <div class="text-center my-4">
 
-                    <h2 class="fw-bold text-success">
-                        45%
-                    </h2>
+                    <h1 class="fw-bold text-success">
+                        <%= goalPercent.toFixed(0) %>%
+                    </h1>
 
                     <p class="text-muted">
-                        Rp 6.750.000 terkumpul
+                        Rp <%= goalCurrent.toLocaleString('id-ID') %> terkumpul
                     </p>
 
                 </div>
 
                 <div class="progress">
                     <div class="progress-bar budget-primary"
-                         style="width:45%">
+                         data-width="<%= goalPercent.toFixed(0) %>">
                     </div>
                 </div>
 
@@ -259,23 +322,23 @@
     <div class="budget-card">
 
         <h5 class="fw-bold mb-4">
-            Rekomendasi Budget
+            Insight Budget
         </h5>
 
-        <div class="row">
+        <div class="row g-4">
 
             <div class="col-md-4">
 
                 <div class="recommend-box">
 
-                    <i class="bi bi-check-circle-fill text-success fs-3"></i>
+                    <i class="bi bi-check-circle-fill text-success fs-2"></i>
 
                     <h6 class="fw-bold mt-3">
                         Pengeluaran Aman
                     </h6>
 
                     <p class="text-muted mb-0">
-                        Pengeluaran primer masih dalam batas ideal.
+                        <%= insight.primer %>
                     </p>
 
                 </div>
@@ -286,14 +349,14 @@
 
                 <div class="recommend-box">
 
-                    <i class="bi bi-exclamation-circle-fill text-warning fs-3"></i>
+                    <i class="bi bi-exclamation-circle-fill text-warning fs-2"></i>
 
                     <h6 class="fw-bold mt-3">
-                        Hiburan Tinggi
+                        Sekunder Tinggi
                     </h6>
 
                     <p class="text-muted mb-0">
-                        Pengeluaran hiburan meningkat 18% dibanding bulan lalu.
+                        <%= insight.sekunder %>
                     </p>
 
                 </div>
@@ -304,14 +367,14 @@
 
                 <div class="recommend-box">
 
-                    <i class="bi bi-piggy-bank-fill text-success fs-3"></i>
+                    <i class="bi bi-piggy-bank-fill text-success fs-2"></i>
 
                     <h6 class="fw-bold mt-3">
-                        Tabungan Baik
+                        Menabung Baik
                     </h6>
 
                     <p class="text-muted mb-0">
-                        Kamu berhasil menyimpan 20% dari pemasukan bulan ini.
+                        <%= insight.tabungan %>
                     </p>
 
                 </div>
@@ -323,3 +386,16 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.progress-bar[data-width]').forEach((element) => {
+        const width = element.getAttribute('data-width');
+        if (width !== null) {
+            element.style.width = `${width}%`;
+        }
+    });
+});
+</script>
+
+<%- include('partials/modal.ejs') %>

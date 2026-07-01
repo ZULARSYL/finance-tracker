@@ -5,7 +5,12 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 require('./utils/db');
+
+
 const Transactions = require('./model/transaction');
+const BudgetSetting = require('./model/budget-setting');
+const GoalSetting = require('./model/goal-setting');
+const { calculateBudgetSummary, DEFAULT_RATIOS } = require('./utils/budgeting');
 
 const app = express();
 const port = 3000;
@@ -27,6 +32,14 @@ app.use(
 );
 app.use(flash());
 
+app.use((req, res, next) => {
+  res.locals.messages = {
+    success: req.flash('success'),
+    error: req.flash('error')
+  };
+  next();
+});
+
 // Set current path for active navbar state
 app.use((req, res, next) => {
   res.locals.currentPath = req.path;
@@ -46,7 +59,7 @@ const getTransactionSummary = async () => {
 
   const totalTransactions = transactions.length;
   const balance = totalIncome - totalExpense;
-  const progress_pengeluaran = totalExpense !== 0 ? balance / totalExpense * 100 : 0;
+  const progress_pengeluaran = totalExpense !== 0 ? (totalExpense / totalIncome) * 100 : 0;
   const progress_pemasukan = totalIncome !== 0 ? balance / totalIncome * 100 : 0;
 
 // menampilkan bulan untuk sekarang
@@ -96,13 +109,119 @@ app.get('/', async (req, res) => {
 });
 
 //route budgeting
-app.get('/budgeting', (req, res) => {
-  // res.send('Hello World!');
-  res.render('budgeting', {
-    layout: 'layouts/main-layout',
-    nama: 'Zul Arsyl',
-    title: 'Halaman Budgeting'
-  });
+app.get('/budgeting', async (req, res) => {
+  try {
+    const [settingsDoc, goalDoc, transactions] = await Promise.all([
+      BudgetSetting.findOne().sort({ createdAt: -1 }),
+      GoalSetting.findOne().sort({ createdAt: -1 }),
+      Transactions.find().sort({ tanggal: -1 })
+    ]);
+
+    const summary = calculateBudgetSummary(transactions, settingsDoc ? settingsDoc.ratios : DEFAULT_RATIOS);
+    const goalTarget = goalDoc ? Number(goalDoc.target || 0) : 0;
+    const goalTitle = goalDoc ? goalDoc.title : 'Target Menabung';
+    const goalCurrent = summary.used.tabungan;
+    const goalPercent = goalTarget > 0 ? Math.min(100, (goalCurrent / goalTarget) * 100) : 0;
+
+    res.render('budgeting', {
+      layout: 'layouts/main-layout',
+      nama: 'Zul Arsyl',
+      title: 'Halaman Budgeting',
+      ...summary,
+      ratios: summary.ratios,
+      progressPrimerPercent: summary.progress.primer,
+      progressSekunderPercent: summary.progress.sekunder,
+      progressTabunganPercent: summary.progress.tabungan,
+      goalTarget,
+      goalCurrent,
+      goalPercent,
+      goalTitle
+    });
+  } catch (error) {
+    console.error('Error fetching budgeting summary:', error);
+    res.render('budgeting', {
+      layout: 'layouts/main-layout',
+      nama: 'Zul Arsyl',
+      title: 'Halaman Budgeting',
+      transactions: [],
+      totalIncome: 0,
+      totalExpense: 0,
+      balance: 0,
+      totalBudget: 0,
+      allocation: { primer: 0, sekunder: 0, tabungan: 0 },
+      used: { primer: 0, sekunder: 0, tabungan: 0 },
+      usedTotal: 0,
+      remaining: 0,
+      usagePercent: 0,
+      progress: { primer: 0, sekunder: 0, tabungan: 0 },
+      ratios: DEFAULT_RATIOS,
+      goalTarget: 0,
+      goalCurrent: 0,
+      goalPercent: 0,
+      goalTitle: 'Target Menabung',
+      progressPrimerPercent: 0,
+      progressSekunderPercent: 0,
+      progressTabunganPercent: 0,
+      currentMonthLabel: new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
+      insight: {
+        primer: 'Pengeluaran primer masih aman.',
+        sekunder: 'Budget sekunder masih terkontrol.',
+        tabungan: 'Tabungan masih perlu ditingkatkan.'
+      }
+    });
+  }
+});
+
+app.post('/budgeting/ratio', async (req, res) => {
+  try {
+    const { primer, sekunder, tabungan } = req.body;
+    const ratios = {
+      primer: Number(primer),
+      sekunder: Number(sekunder),
+      tabungan: Number(tabungan)
+    };
+
+    const total = ratios.primer + ratios.sekunder + ratios.tabungan;
+    if (total !== 100) {
+      req.flash('error', 'Total rasio harus 100%');
+      return res.redirect('/budgeting');
+    }
+
+    await BudgetSetting.findOneAndUpdate(
+      {},
+      { ratios },
+      { upsert: true, new: true }
+    );
+
+    req.flash('success', 'Rasio budget berhasil disimpan');
+    res.redirect('/budgeting');
+  } catch (error) {
+    console.error('Error saving budget ratio:', error);
+    req.flash('error', 'Gagal menyimpan rasio budget');
+    res.redirect('/budgeting');
+  }
+});
+
+app.post('/budgeting/goal', async (req, res) => {
+  try {
+    const { title, target } = req.body;
+
+    await GoalSetting.findOneAndUpdate(
+      {},
+      {
+        title: title || 'Target Menabung',
+        target: Number(target || 0)
+      },
+      { upsert: true, new: true }
+    );
+
+    req.flash('success', 'Target goal berhasil disimpan');
+    res.redirect('/budgeting');
+  } catch (error) {
+    console.error('Error saving goal:', error);
+    req.flash('error', 'Gagal menyimpan target goal');
+    res.redirect('/budgeting');
+  }
 });
 
 
