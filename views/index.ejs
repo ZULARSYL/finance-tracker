@@ -1,0 +1,412 @@
+
+<style>
+.hero-section{
+    background:linear-gradient(
+    135deg,
+    #0A5C15,
+    #128D24
+    );
+    border-radius:24px;
+    color:white;
+    padding:50px;
+    position:relative;
+    overflow:hidden;
+}
+
+.hero-section::before{
+    content:'';
+    position:absolute;
+    width:300px;
+    height:300px;
+    background:rgba(255,255,255,.08);
+    border-radius:50%;
+    right:-80px;
+    top:-80px;
+}
+
+.hero-section::after{
+    content:'';
+    position:absolute;
+    width:200px;
+    height:200px;
+    background:rgba(255,255,255,.05);
+    border-radius:50%;
+    bottom:-50px;
+    right:100px;
+}
+
+.summary-card{
+    border:none;
+    border-radius:20px;
+    background:white;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+    transition:.3s;
+}
+
+.summary-card:hover{
+    transform:translateY(-5px);
+}
+
+.summary-icon{
+    width:55px;
+    height:55px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.income-icon{
+    background:#e9f9ee;
+    color:#198754;
+}
+
+.expense-icon{
+    background:#ffecec;
+    color:#dc3545;
+}
+
+.balance-icon{
+    background:#eaf8ec;
+    color:#0A5C15;
+}
+
+.card-modern{
+    border:none;
+    border-radius:20px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.progress{
+    height:12px;
+    border-radius:20px;
+}
+
+.btn-primary-custom{
+    background:#fff;
+    color:#0A5C15;
+    font-weight:600;
+    border:none;
+    padding:12px 24px;
+    border-radius:12px;
+}
+
+.btn-primary-custom:hover{
+    background:#f0f0f0;
+}
+
+.transaction-item{
+    padding:15px 0;
+    border-bottom:1px solid #f1f1f1;
+}
+
+.transaction-item:last-child{
+    border-bottom:none;
+}
+
+.amount-income{
+    color:#198754;
+    font-weight:600;
+}
+
+.amount-expense{
+    color:#dc3545;
+    font-weight:600;
+}
+
+.date-box{
+    background:rgba(255,255,255,.15);
+    padding:20px;
+    border-radius:16px;
+    text-align:center;
+}
+
+.section-title{
+    font-weight:600;
+    margin-bottom:20px;
+}
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- HERO -->
+    <section class="hero-section mb-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="fw-bold mb-3">
+                    Selamat Datang <%= nama %>!👋</h2>
+                </h2>
+                <p class="mb-4 fs-5">
+                    Kelola keuanganmu dengan lebih bijak dan capai tujuan finansialmu setiap hari.
+                </p>
+                <button class="btn btn-primary-custom">
+                    <a href="transaksi" class="text-decoration-none text-dark">
+                    <i class="bi bi-plus-circle"></i>
+                    Tambah Transaksi
+                    </a>
+                </button>
+            </div>
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="date-box">
+                    <h6>Hari Ini</h6>
+                    <h4 id="currentDate"></h4>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- SUMMARY -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <small class="text-muted">
+                                Saldo Saat Ini
+                            </small>
+
+                            <h4 class="fw-bold mt-2">
+                                Rp <%= balance.toLocaleString('id-ID') %>
+                            </h4>
+                        </div>
+
+                        <div class="summary-icon balance-icon">
+                            <i class="bi bi-wallet-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card summary-card">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <small class="text-muted">
+                                Pemasukan
+                            </small>
+
+                            <h4 class="fw-bold text-success mt-2">
+                                + Rp <%= totalIncome.toLocaleString('id-ID') %>
+                            </h4>
+                        </div>
+
+                        <div class="summary-icon income-icon">
+                            <i class="bi bi-arrow-down-circle-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card summary-card">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <small class="text-muted">
+                                Pengeluaran
+                            </small>
+
+                            <h4 class="fw-bold text-danger mt-2">
+                                - Rp <%= totalExpense.toLocaleString('id-ID') %>
+                            </h4>
+                        </div>
+
+                        <div class="summary-icon expense-icon">
+                            <i class="bi bi-arrow-up-circle-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- PROGRESS -->
+        <div class="col-lg-6">
+
+            <div class="card card-modern h-100">
+
+                <div class="card-body p-4">
+
+                    <h5 class="section-title">
+                        Progress Hari Ini
+                    </h5>
+
+                    <div class="mb-4">
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Pengeluaran</span>
+                            <span><%= progress_pengeluaran.toFixed(2) %>%</span>
+                        </div>
+
+                        <div class="progress">
+                            <div class="progress-bar bg-danger"
+                                 style="width:45%">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Pemasukan</span>
+                            <span><%= progress_pemasukan.toFixed(2) %>%</span>
+                        </div>
+
+                        <div class="progress">
+                            <div class="progress-bar"
+                                 style="width:75%; background:#0A5C15">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- QUICK ACTION -->
+        <div class="col-lg-6">
+
+            <div class="card card-modern h-100">
+
+                <div class="card-body p-4">
+
+                    <h5 class="section-title">
+                        Menu Cepat
+                    </h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-6">
+                            <button class="btn btn-success w-100 py-3" data-bs-toggle="modal"
+                            data-bs-target="#incomeModal">
+                                <i class="bi bi-plus-circle"></i><br>
+                                Tambah Pemasukan
+                            </button>
+                        </div>
+
+                        <div class="col-6">
+                            <button class="btn btn-danger w-100 py-3" data-bs-toggle="modal"
+                                data-bs-target="#expenseModal">
+                                <i class="bi bi-dash-circle"></i><br>
+                                Tambah Pengeluaran
+                            </button>
+                        </div>
+
+                        <div class="col-6">
+                            <a href="budgeting">
+                                <button class="btn btn-outline-success w-100 py-3">
+                                    <i class="bi bi-pie-chart"></i><br>
+                                    Budgeting
+                                </button>
+                            </a>
+                        </div>
+
+                        <div class="col-6">
+                            <a href="laporan">
+                                <button class="btn btn-outline-success w-100 py-3">
+                                    <i class="bi bi-file-earmark-text"></i><br>
+                                    Laporan
+                                </button>
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TRANSAKSI -->
+    <div class="card card-modern mt-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <h5 class="fw-bold mb-0">
+                    Transaksi Terbaru
+                </h5>
+
+                <a href="#" class="text-decoration-none">
+                    Lihat Semua
+                </a>
+
+            </div>
+            <% if (transactions.length > 0) { %>
+                <div class="transaction-item">
+                    <% transactions.forEach(transaction => { %>
+                        <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                            <div>
+                                <strong><%= transaction.catatan %></strong>
+                                <div class="text-muted small">
+                                     <%= new Date(transaction.tanggal).toLocaleDateString('id-ID', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    }) %>
+                                </div>
+                            </div>
+
+                            <div class="<%= transaction.jenis === 'Pemasukan' ? 'text-success' : 'text-danger' %> fw-bold">
+                                <%= transaction.jenis === 'Pemasukan' ? '+' : '-' %>
+                                Rp <%= transaction.nominal.toLocaleString('id-ID') %>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="text-center text-muted py-4 ">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mb-0 mt-2">Belum ada transaksi.</p> 
+                </div>
+            <% } %>
+        </div>
+
+    </div>
+
+</div>
+<%- include('partials/modal.ejs') %>
+<script>
+    const options = {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    };
+
+    document.getElementById('currentDate').innerHTML =
+        new Date().toLocaleDateString('id-ID', options);
+</script>
+
+

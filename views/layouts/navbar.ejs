@@ -1,0 +1,191 @@
+<style>
+    .navbar{
+        padding:15px 0;
+        background:white;
+    }
+
+    .logo-icon{
+        width:40px;
+        height:40px;
+        background:var(--primary);
+        color:white;
+        border-radius:12px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .navbar-brand{
+        color:var(--primary);
+        font-size:1.2rem;
+    }
+
+    .nav-link{
+        font-weight:500;
+        color:#666;
+        transition:.3s;
+        border-radius:10px;
+        padding:10px 15px !important;
+    }
+
+    .nav-link:hover{
+        color:var(--primary);
+        background:var(--primary-light);
+    }
+
+    .nav-link.active{
+        color:var(--primary) !important;
+        background:var(--primary-light);
+    }
+
+    .notification-btn{
+        width:45px;
+        height:45px;
+        border:none;
+        border-radius:12px;
+        background:#f5f5f5;
+        font-size:18px;
+    }
+
+    .notification-btn:hover{
+        background:var(--primary-light);
+        color:var(--primary);
+    }
+
+    .dropdown-menu{
+        border-radius:15px;
+        min-width:220px;
+    }
+
+    .dropdown-item{
+        padding:10px 15px;
+    }
+
+    .dropdown-item:hover{
+        background:var(--primary-light);
+    }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
+            <div class="logo-icon me-2">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            Finance Tracker
+        </a>
+        <!-- Toggle Mobile -->
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Menu -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+
+            <ul class="navbar-nav mx-auto gap-lg-3">
+
+                <li class="nav-item">
+                    <a class="nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/">
+                        <i class="bi bi-house-door me-1"></i>
+                        Home
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <%= currentPath === '/transaksi' ? 'active' : '' %>" href="/transaksi">
+                        <i class="bi bi-arrow-left-right me-1"></i>
+                        Transaksi
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <%= currentPath === '/budgeting' ? 'active' : '' %>" href="/budgeting">
+                        <i class="bi bi-pie-chart me-1"></i>
+                        Budgeting
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <%= currentPath === '/laporan' ? 'active' : '' %>" href="/laporan">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i>
+                        Laporan
+                    </a>
+                </li>
+
+            </ul>
+
+            <!-- Right Side -->
+            <div class="d-flex align-items-center gap-3">
+
+                <!-- Notification -->
+                <button class="btn notification-btn position-relative">
+
+                    <i class="bi bi-bell"></i>
+
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        3
+                    </span>
+
+                </button>
+
+                <!-- Profile -->
+                <div class="dropdown">
+
+                    <a href="#"
+                       class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                       data-bs-toggle="dropdown">
+
+                        <img src="https://ui-avatars.com/api/?name=Zul+Arsyl&background=0A5C15&color=fff"
+                             width="40"
+                             height="40"
+                             class="rounded-circle me-2">
+
+                        <div class="d-none d-md-block">
+                            <div class="fw-semibold text-dark">
+                                Zul Arsyl
+                            </div>
+                            <small class="text-muted">
+                                Personal User
+                            </small>
+                        </div>
+
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+
+                        <li>
+                            <a class="dropdown-item" href="/profile">
+                                <i class="bi bi-person me-2"></i>
+                                Profile
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="/settings">
+                                <i class="bi bi-gear me-2"></i>
+                                Settings
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item text-danger" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</nav>

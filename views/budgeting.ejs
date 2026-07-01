@@ -1,0 +1,325 @@
+<style>
+.budget-card{
+    background:#fff;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+    border:none;
+}
+
+.budget-icon{
+    width:60px;
+    height:60px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    margin-bottom:15px;
+}
+
+.btn-budget{
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:10px 20px;
+}
+
+.btn-budget:hover{
+    background:#128D24;
+    color:white;
+}
+
+.progress{
+    height:12px;
+    border-radius:50px;
+    background:#eef2f3;
+}
+
+.budget-primary{
+    background:var(--primary);
+}
+
+.recommend-box{
+    background:#fafafa;
+    border-radius:18px;
+    padding:20px;
+    height:100%;
+    transition:.3s;
+}
+
+.recommend-box:hover{
+    transform:translateY(-4px);
+}
+</style>
+<div class="container-fluid py-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Budgeting
+            </h2>
+            <p class="text-muted mb-0">
+                Pantau dan optimalkan pengeluaran bulananmu.
+            </p>
+        </div>
+
+        <button class="btn btn-budget">
+            <i class="bi bi-plus-lg me-2"></i>
+            Buat Budget Baru
+        </button>
+
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="budget-card">
+
+                <div class="budget-icon bg-success-subtle">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+
+                <p class="text-muted mb-2">
+                    Budget Bulan Ini
+                </p>
+
+                <h4 class="fw-bold">
+                    Rp 5.000.000
+                </h4>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="budget-card">
+
+                <div class="budget-icon bg-warning-subtle">
+                    <i class="bi bi-bar-chart"></i>
+                </div>
+
+                <p class="text-muted mb-2">
+                    Sudah Digunakan
+                </p>
+
+                <h4 class="fw-bold">
+                    Rp 3.200.000
+                </h4>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="budget-card">
+
+                <div class="budget-icon bg-primary-subtle">
+                    <i class="bi bi-piggy-bank"></i>
+                </div>
+
+                <p class="text-muted mb-2">
+                    Sisa Budget
+                </p>
+
+                <h4 class="fw-bold text-success">
+                    Rp 1.800.000
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BUDGET CATEGORY -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-8">
+
+            <div class="budget-card">
+
+                <h5 class="fw-bold mb-4">
+                    Alokasi Budget Bulanan
+                </h5>
+
+                <!-- Primer -->
+                <div class="mb-4">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Primer</span>
+                        <span>65%</span>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar budget-primary"
+                             style="width:65%">
+                        </div>
+                    </div>
+
+                    <small class="text-muted">
+                        Makan, Transportasi, Komunikasi
+                    </small>
+
+                </div>
+
+                <!-- Sekunder -->
+                <div class="mb-4">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sekunder</span>
+                        <span>20%</span>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar bg-warning"
+                             style="width:20%">
+                        </div>
+                    </div>
+
+                    <small class="text-muted">
+                        Hiburan, Olahraga
+                    </small>
+
+                </div>
+
+                <!-- Tersier -->
+                <div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tersier</span>
+                        <span>15%</span>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar bg-danger"
+                             style="width:15%">
+                        </div>
+                    </div>
+
+                    <small class="text-muted">
+                        Belanja dan kebutuhan tambahan
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- GOAL -->
+        <div class="col-lg-4">
+
+            <div class="budget-card h-100">
+
+                <h5 class="fw-bold mb-4">
+                    Goal Menabung
+                </h5>
+
+                <h3 class="fw-bold">
+                    Laptop Baru
+                </h3>
+
+                <p class="text-muted">
+                    Target Rp 15.000.000
+                </p>
+
+                <div class="text-center my-4">
+
+                    <h2 class="fw-bold text-success">
+                        45%
+                    </h2>
+
+                    <p class="text-muted">
+                        Rp 6.750.000 terkumpul
+                    </p>
+
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar budget-primary"
+                         style="width:45%">
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RECOMMENDATION -->
+    <div class="budget-card">
+
+        <h5 class="fw-bold mb-4">
+            Rekomendasi Budget
+        </h5>
+
+        <div class="row">
+
+            <div class="col-md-4">
+
+                <div class="recommend-box">
+
+                    <i class="bi bi-check-circle-fill text-success fs-3"></i>
+
+                    <h6 class="fw-bold mt-3">
+                        Pengeluaran Aman
+                    </h6>
+
+                    <p class="text-muted mb-0">
+                        Pengeluaran primer masih dalam batas ideal.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="recommend-box">
+
+                    <i class="bi bi-exclamation-circle-fill text-warning fs-3"></i>
+
+                    <h6 class="fw-bold mt-3">
+                        Hiburan Tinggi
+                    </h6>
+
+                    <p class="text-muted mb-0">
+                        Pengeluaran hiburan meningkat 18% dibanding bulan lalu.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="recommend-box">
+
+                    <i class="bi bi-piggy-bank-fill text-success fs-3"></i>
+
+                    <h6 class="fw-bold mt-3">
+                        Tabungan Baik
+                    </h6>
+
+                    <p class="text-muted mb-0">
+                        Kamu berhasil menyimpan 20% dari pemasukan bulan ini.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,425 @@
+<!-- modal input transaksi pemasukan -->
+<div class="modal fade" id="incomeModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Tambah Pemasukan
+                </h5>
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/transaksi/pemasukan" method="POST" id="incomeForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Jenis Pemasukan
+                            </label>
+                            <select class="form-select" name="kategori">
+                                <option value="Gaji">Gaji</option>
+                                <option value="Tabungan">Tabungan</option>
+                                <option value="Lembur">Lembur</option>
+                                <option value="Tambahan">Tambahan</option>
+                            </select>
+                            <input type="hidden" name="jenis" value="Pemasukan">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Nominal
+                            </label>
+                            <input
+                                id="nominal"
+                                type="text"
+                                class="form-control"
+                                maxlength="20">
+                            <input
+                                type="hidden"
+                                id="nominal-raw"
+                                name="nominal"
+                                maxlength="15">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Tanggal
+                            </label>
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="tanggal">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                Catatan
+                            </label>
+                            <textarea
+                                class="form-control"
+                                name="catatan"
+                                rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button class="btn btn-income" type="submit">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- modal input transaksi pengeluaran -->
+<div class="modal fade" id="expenseModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Tambah Pengeluaran
+                </h5>
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/transaksi/pengeluaran" method="POST" id="expenseForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Jenis Pengeluaran
+                            </label>
+                            <select class="form-select" name="kategori">
+                                <option value="Makan">Makan</option>
+                                <option value="Transportasi">Transportasi</option>
+                                <option value="Komunikasi">Komunikasi</option>
+                                <option value="Olahraga">Olahraga</option>
+                                <option value="Belanja">Belanja</option>
+                                <option value="Pendidikan">Pendidikan</option>
+                                <option value="Hiburan">Hiburan</option>
+                            </select>
+                            <input type="hidden" name="jenis" value="Pengeluaran">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Nominal
+                            </label>
+                            <input
+                                id="nominal-expense"
+                                type="text"
+                                class="form-control"
+                                maxlength="20">
+                            <input
+                                type="hidden"
+                                id="nominal-expense-raw"
+                                name="nominal"
+                                maxlength="15">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Tanggal
+                            </label>
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="tanggal">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                Catatan
+                            </label>
+                            <textarea
+                                class="form-control"
+                                name="catatan"
+                                rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button class="btn btn-expense" type="submit">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal detail transaksi -->
+<div class="modal fade" id="DetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Detail Transaksi
+                </h5>
+                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detailModalBody">
+                <div class="text-muted">Memuat detail transaksi...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- modal edit transaksi -->
+<div class="modal fade" id="EditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Edit Transaksi
+                </h5>
+                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editModalBody">
+                <form action="" method="POST" id="editTransactionForm">
+                    <input type="hidden" name="transactionId" id="editTransactionId">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Kategori
+                            </label>
+                            <select class="form-select" name="kategori" id="editKategori">
+                                <option value="Gaji">Gaji</option>
+                                <option value="Tabungan">Tabungan</option>
+                                <option value="Lembur">Lembur</option>
+                                <option value="Tambahan">Tambahan</option>
+                                <option value="Makan">Makan</option>
+                                <option value="Transportasi">Transportasi</option>
+                                <option value="Komunikasi">Komunikasi</option>
+                                <option value="Olahraga">Olahraga</option>
+                                <option value="Belanja">Belanja</option>
+                                <option value="Pendidikan">Pendidikan</option>
+                                <option value="Hiburan">Hiburan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Jenis
+                            </label>
+                            <select class="form-select" name="jenis" id="editJenis">
+                                <option value="Pemasukan">Pemasukan</option>
+                                <option value="Pengeluaran">Pengeluaran</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Nominal
+                            </label>
+                            <input
+                                id="editNominal"
+                                type="text"
+                                class="form-control"
+                                maxlength="20">
+                            <input
+                                type="hidden"
+                                id="editNominalRaw"
+                                name="nominal"
+                                maxlength="15">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Tanggal
+                            </label>
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="tanggal"
+                                id="editTanggal">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                Catatan
+                            </label>
+                            <textarea
+                                class="form-control"
+                                name="catatan"
+                                id="editCatatan"
+                                rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Batal
+                </button>
+                <button class="btn btn-warning" type="submit" form="editTransactionForm">
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Format rupiah untuk pemasukan
+const displayIncome = document.getElementById('nominal');
+const hiddenIncome = document.getElementById('nominal-raw');
+
+if (displayIncome) {
+    displayIncome.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        hiddenIncome.value = value;
+        e.target.value = value
+            ? new Intl.NumberFormat('id-ID').format(value)
+            : '';
+    });
+}
+
+// Format rupiah untuk pengeluaran
+const displayExpense = document.getElementById('nominal-expense');
+const hiddenExpense = document.getElementById('nominal-expense-raw');
+
+if (displayExpense) {
+    displayExpense.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        hiddenExpense.value = value;
+        e.target.value = value
+            ? new Intl.NumberFormat('id-ID').format(value)
+            : '';
+    });
+}
+
+// Isi modal detail transaksi berdasarkan id
+const detailModalBody = document.getElementById('detailModalBody');
+
+const editKategori = document.getElementById('editKategori');
+const editJenis = document.getElementById('editJenis');
+const editNominal = document.getElementById('editNominal');
+const editNominalRaw = document.getElementById('editNominalRaw');
+const editTanggal = document.getElementById('editTanggal');
+const editCatatan = document.getElementById('editCatatan');
+const editTransactionForm = document.getElementById('editTransactionForm');
+const editTransactionId = document.getElementById('editTransactionId');
+
+if (editNominal && editNominalRaw) {
+    editNominal.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        editNominalRaw.value = value;
+        e.target.value = value
+            ? new Intl.NumberFormat('id-ID').format(value)
+            : '';
+    });
+}
+
+const populateEditModal = (transaction) => {
+    if (!editKategori || !editJenis || !editNominal || !editNominalRaw || !editTanggal || !editCatatan || !editTransactionId || !editTransactionForm) {
+        return;
+    }
+
+    editTransactionId.value = transaction._id;
+    editKategori.value = transaction.kategori;
+    editJenis.value = transaction.jenis;
+    editNominalRaw.value = transaction.nominal;
+    editNominal.value = Number(transaction.nominal).toLocaleString('id-ID');
+    editTanggal.value = transaction.tanggal ? new Date(transaction.tanggal).toISOString().slice(0, 10) : '';
+    editCatatan.value = transaction.catatan || '';
+    editTransactionForm.action = `/transaksi/${transaction._id}/edit`;
+};
+
+const openDetailModal = async (transactionId) => {
+    if (!detailModalBody) return;
+
+    detailModalBody.innerHTML = '<div class="text-muted">Memuat detail transaksi...</div>';
+    try {
+        const response = await fetch(`/api/transaksi/${transactionId}`);
+        const transaction = await response.json();
+        if (!response.ok) {
+            throw new Error(transaction.message || 'Gagal mengambil detail transaksi');
+        }
+        const tanggal = new Date(transaction.tanggal).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        const nominal = Number(transaction.nominal || 0).toLocaleString('id-ID');
+        detailModalBody.innerHTML = `
+            <div class="row g-3">
+                <div class="col-12">
+                    <h5 class="fw-bold mb-1">${transaction.kategori}</h5>
+                    <p class="text-muted mb-0">${tanggal}</p>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Jenis</label>
+                    <div>
+                        <span class="badge ${transaction.jenis === 'Pemasukan' ? 'bg-success' : 'bg-danger'}">
+                            ${transaction.jenis}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Nominal</label>
+                    <div class="fw-bold ${transaction.jenis === 'Pemasukan' ? 'text-success' : 'text-danger'}">
+                        ${transaction.jenis === 'Pemasukan' ? '+' : '-'} Rp ${nominal}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Catatan</label>
+                    <div class="border rounded-3 p-3 bg-light">
+                        ${transaction.catatan || '-'}
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        detailModalBody.innerHTML = `
+            <div class="alert alert-danger mb-0">
+                ${error.message}
+            </div>
+        `;
+    }
+};
+
+const openEditModal = async (transactionId) => {
+    try {
+        const response = await fetch(`/api/transaksi/${transactionId}`);
+        const transaction = await response.json();
+        if (!response.ok) {
+            throw new Error(transaction.message || 'Gagal mengambil detail transaksi');
+        }
+        populateEditModal(transaction);
+    } catch (error) {
+        console.error(error);
+        alert('Gagal memuat data edit transaksi');
+    }
+};
+
+
+document.addEventListener('click', async function (event) {
+    const viewButton = event.target.closest('.view-detail-btn');
+    const editButton = event.target.closest('.edit-transaction-btn');
+
+    if (viewButton) {
+        const transactionId = viewButton.getAttribute('data-transaction-id');
+        if (transactionId) {
+            await openDetailModal(transactionId);
+        }
+    }
+
+    if (editButton) {
+        const transactionId = editButton.getAttribute('data-transaction-id');
+        if (transactionId) {
+            await openEditModal(transactionId);
+        }
+    }
+});
+</script>

@@ -1,0 +1,258 @@
+<style>
+
+.transaction-card{
+    background:#fff;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.btn-income{
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:10px 20px;
+}
+
+.btn-income:hover{
+    background:#128D24;
+    color:white;
+}
+
+.btn-expense{
+    background:#dc3545;
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:10px 20px;
+}
+
+.btn-expense:hover{
+    background:#bb2d3b;
+    color:white;
+}
+
+.table th{
+    font-weight:600;
+    border-top:none;
+}
+
+.modal-content{
+    border-radius:24px;
+}
+
+.form-control,
+.form-select{
+    border-radius:12px;
+    padding:12px;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:#0A5C15;
+    box-shadow:0 0 0 .25rem rgba(10,92,21,.15);
+}
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Transaksi
+            </h2>
+
+            <p class="text-muted mb-0">
+                Kelola seluruh pemasukan dan pengeluaran keuangan.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button
+                class="btn btn-income"
+                data-bs-toggle="modal"
+                data-bs-target="#incomeModal">
+
+                <i class="bi bi-plus-circle me-2"></i>
+                Pemasukan
+
+            </button>
+
+            <button
+                class="btn btn-expense"
+                data-bs-toggle="modal"
+                data-bs-target="#expenseModal">
+
+                <i class="bi bi-dash-circle me-2"></i>
+                Pengeluaran
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="transaction-card">
+
+                <small class="text-muted">
+                    Pemasukan Bulan Ini
+                </small>
+
+                <h4 class="text-success fw-bold mt-2">
+                    + Rp <%= totalIncome.toLocaleString('id-ID') %>
+                </h4>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="transaction-card">
+
+                <small class="text-muted">
+                    Pengeluaran Bulan Ini
+                </small>
+
+                <h4 class="text-danger fw-bold mt-2">
+                    - Rp <%= totalExpense.toLocaleString('id-ID') %>
+                </h4>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="transaction-card">
+
+                <small class="text-muted">
+                    Total Transaksi
+                </small>
+
+                <h4 class="fw-bold mt-2">
+                    <%= totalTransactions %>
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTER -->
+    <div class="transaction-card mb-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <input
+                    type="month"
+                    class="form-control">
+            </div>
+            <div class="col-md-6">
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Cari transaksi...">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-outline-success w-100">
+                    Filter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="transaction-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold mb-0">
+                History Transaksi Bulan Ini
+            </h5>
+            <span class="badge bg-success">
+                <%= currentMonth %>
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Kategori</th>
+                        <th>Jenis</th>
+                        <th>Catatan</th>
+                        <th>Nominal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (transactions.length > 0) { %>
+                        <% transactions.forEach(transaction => { %>
+                            <tr>
+                                <td>
+                                    <%= new Date(transaction.tanggal).toLocaleDateString('id-ID', { 
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    }) %>
+                                </td>
+                                <td><%= transaction.kategori %></td>
+                                <td>
+                                    <% if (transaction.jenis === 'Pemasukan') { %>
+                                        <span class="badge bg-success">
+                                            <%= transaction.jenis %>
+                                        </span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger">
+                                            <%= transaction.jenis %>
+                                        </span>
+                                    <% } %>
+                                </td>
+                                <td><%= transaction.catatan || '-' %></td>
+                                <td class="<%= transaction.jenis === 'Pemasukan' ? 'text-success' : 'text-danger' %> fw-semibold">
+                                    <%= transaction.jenis === 'Pemasukan' ? '+' : '-' %> Rp <%= transaction.nominal.toLocaleString('id-ID') %>
+                                </td>
+                                <td>
+                                    <button
+                                        class="btn btn-sm btn-outline-success view-detail-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#DetailModal"
+                                        data-transaction-id="<%= transaction._id %>">
+                                        Lihat
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning edit-transaction-btn" data-bs-toggle="modal" data-bs-target="#EditModal" data-transaction-id="<%= transaction._id %>">
+                                        Edit
+                                    </button>
+                                    
+                                    <form action="/transaksi/<%= transaction._id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Belum ada data transaksi
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<%- include('partials/modal.ejs') %>
+
