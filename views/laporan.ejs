@@ -17,25 +17,31 @@
     margin-bottom:15px;
 }
 
-.income{
+.income-icon{
     background:#EAF8EC;
-    color:var(--primary);
+    color:#0A5C15;
 }
 
-.expense{
-    background:#FFECEC;
-    color:#DC3545;
+.expense-icon{
+    background:#FDECEC;
+    color:#dc3545;
 }
 
-.balance{
-    background:#EDF4FF;
-    color:#0D6EFD;
+.saving-icon{
+    background:#EEF4FF;
+    color:#0d6efd;
+}
+
+.budget-icon{
+    background:#FFF6DD;
+    color:#ffc107;
 }
 
 .btn-report{
-    background:var(--primary);
+    background:#0A5C15;
     color:white;
     border:none;
+    border-radius:12px;
 }
 
 .btn-report:hover{
@@ -43,59 +49,45 @@
     color:white;
 }
 
-.insight-box{
-    background:#FAFAFA;
-    border-radius:18px;
-    padding:20px;
-    height:100%;
-    transition:.3s;
+.transaction-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 0;
+    border-bottom:1px solid #f1f1f1;
 }
 
-.insight-box:hover{
-    transform:translateY(-4px);
+.transaction-item:last-child{
+    border-bottom:none;
 }
 
-.table th{
-    border-top:none;
-    font-weight:600;
-}
-
-@media print{
-
-    .btn,
-    select,
-    input{
-        display:none !important;
-    }
-
-    body{
-        background:white;
-    }
-
-    .report-card{
-        box-shadow:none;
-        border:1px solid #ddd;
-    }
+.progress{
+    height:12px;
+    border-radius:50px;
+    background:#eef2f3;
 }
 </style>
 <div class="container-fluid py-4">
 
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
         <div>
-            <h2 class="fw-bold mb-1">
-                Laporan Keuangan
-            </h2>
-
+            <h2 class="fw-bold mb-1">Laporan Keuangan</h2>
             <p class="text-muted mb-0">
-                Analisis pemasukan dan pengeluaran Anda.
+                Ringkasan keuangan berdasarkan periode yang dipilih.
             </p>
         </div>
 
         <div class="d-flex gap-2">
 
+            <input type="month" class="form-control">
+
             <button class="btn btn-outline-success">
+                <i class="bi bi-search"></i>
+            </button>
+
+            <button class="btn btn-outline-danger">
                 <i class="bi bi-file-earmark-pdf me-2"></i>
                 Export PDF
             </button>
@@ -112,64 +104,76 @@
     <!-- SUMMARY -->
     <div class="row g-4 mb-4">
 
-        <div class="col-md-4">
-
+        <div class="col-lg-3 col-md-6">
             <div class="report-card">
-
-                <div class="report-icon income">
+                <div class="report-icon income-icon">
                     <i class="bi bi-arrow-down-circle"></i>
                 </div>
 
-                <small class="text-muted">
-                    Total Pemasukan
-                </small>
+                <p class="text-muted mb-1">Pemasukan</p>
 
-                <h4 class="fw-bold text-success mt-2">
-                    Rp 8.500.000
+                <h4 class="fw-bold text-success">
+                    Rp <%= totalIncome.toLocaleString('id-ID') %>
                 </h4>
 
+                <small class="text-muted">
+                    3 transaksi
+                </small>
             </div>
-
         </div>
 
-        <div class="col-md-4">
-
+        <div class="col-lg-3 col-md-6">
             <div class="report-card">
-
-                <div class="report-icon expense">
+                <div class="report-icon expense-icon">
                     <i class="bi bi-arrow-up-circle"></i>
                 </div>
 
-                <small class="text-muted">
-                    Total Pengeluaran
-                </small>
+                <p class="text-muted mb-1">Pengeluaran</p>
 
-                <h4 class="fw-bold text-danger mt-2">
-                    Rp 4.250.000
+                <h4 class="fw-bold text-danger">
+                    Rp <%= totalExpense.toLocaleString('id-ID') %>
                 </h4>
 
+                <small class="text-muted">
+                    24 transaksi
+                </small>
             </div>
-
         </div>
 
-        <div class="col-md-4">
-
+        <div class="col-lg-3 col-md-6">
             <div class="report-card">
-
-                <div class="report-icon balance">
-                    <i class="bi bi-wallet2"></i>
+                <div class="report-icon saving-icon">
+                    <i class="bi bi-piggy-bank"></i>
                 </div>
 
-                <small class="text-muted">
-                    Saldo Bersih
-                </small>
+                <p class="text-muted mb-1">Tabungan</p>
 
-                <h4 class="fw-bold mt-2">
-                    Rp 4.250.000
+                <h4 class="fw-bold text-primary">
+                    rp
                 </h4>
 
+                <small class="text-muted">
+                    32.5% dari pemasukan
+                </small>
             </div>
+        </div>
 
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card">
+                <div class="report-icon budget-icon">
+                    <i class="bi bi-bar-chart"></i>
+                </div>
+
+                <p class="text-muted mb-1">Status Budget</p>
+
+                <h4 class="fw-bold text-success">
+                    Aman
+                </h4>
+
+                <small class="text-muted">
+                    67% budget telah digunakan
+                </small>
+            </div>
         </div>
 
     </div>
@@ -178,162 +182,137 @@
     <div class="report-card mb-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-
             <h5 class="fw-bold mb-0">
-                Ringkasan Bulan Ini
+                Grafik Keuangan Bulanan
             </h5>
-
-            <select class="form-select w-auto">
-
-                <option>Juni 2026</option>
-                <option>Mei 2026</option>
-
-            </select>
-
         </div>
 
-        <canvas id="financeChart" height="100"></canvas>
+        <canvas id="financeChart" height="90"></canvas>
 
     </div>
 
-    <!-- TRANSACTION TABLE -->
-    <div class="report-card mb-4">
+    <div class="row g-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- INCOME -->
+        <div class="col-lg-6">
 
-            <h5 class="fw-bold mb-0">
-                Riwayat Transaksi
-            </h5>
+            <div class="report-card h-100">
 
-            <div class="d-flex gap-2">
+                <div class="d-flex justify-content-between align-items-center mb-4">
 
-                <input
-                    type="month"
-                    class="form-control">
+                    <h5 class="fw-bold mb-0">
+                        Laporan Pemasukan
+                    </h5>
 
-                <button class="btn btn-outline-secondary">
-                    Filter
-                </button>
+                    <span class="badge bg-success">
+                        Rp <%= totalIncome.toLocaleString('id-ID') %>
+                    </span>
 
+                </div>
+                <% IncomeTransactions.forEach(t => { %>
+                <div class="transaction-item">
+                    <div>
+                        <h6 class="mb-1"><%= t.kategori %></h6>
+                        <small class="text-muted"><%= new Date(t.tanggal).toLocaleDateString('id-ID', { 
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    }) %>
+                        </small>
+                    </div>
+
+                    <span class="text-success fw-bold">
+                        + Rp <%= t.nominal.toLocaleString('id-ID') %>
+                    </span>
+                </div>
+                <% }); %>
             </div>
 
         </div>
 
-        <div class="table-responsive">
+        <!-- EXPENSE -->
+        <div class="col-lg-6">
 
-            <table class="table align-middle">
+            <div class="report-card h-100">
 
-                <thead>
+                <div class="d-flex justify-content-between align-items-center mb-4">
 
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Kategori</th>
-                        <th>Jenis</th>
-                        <th>Catatan</th>
-                        <th>Nominal</th>
-                    </tr>
+                    <h5 class="fw-bold mb-0">
+                        Laporan Pengeluaran
+                    </h5>
 
-                </thead>
+                    <span class="badge bg-danger">
+                        Rp <%= totalExpense.toLocaleString('id-ID') %>
+                    </span>
 
-                <tbody>
+                </div>
+                <% ExpenseTransactions.forEach(t => { %>
+                <div class="transaction-item">
+                    <div>
+                        <h6 class="mb-1"><%= t.kategori %></h6>
+                        <small class="text-muted"><%= new Date(t.tanggal).toLocaleDateString('id-ID', { 
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    }); %>
+                        </small>
+                    </div>
 
-                    <tr>
-                        <td>14 Juni 2026</td>
-                        <td>Makan</td>
-                        <td>
-                            <span class="badge bg-danger">
-                                Pengeluaran
-                            </span>
-                        </td>
-                        <td>Makan Siang</td>
-                        <td class="text-danger fw-semibold">
-                            - Rp 25.000
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>12 Juni 2026</td>
-                        <td>Gaji</td>
-                        <td>
-                            <span class="badge bg-success">
-                                Pemasukan
-                            </span>
-                        </td>
-                        <td>Gaji Bulanan</td>
-                        <td class="text-success fw-semibold">
-                            + Rp 4.500.000
-                        </td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-
+                    <span class="text-danger fw-bold">
+                        - Rp <%= t.nominal.toLocaleString('id-ID') %>
+                    </span>
+                </div>
+                <% }); %>
+            </div>
         </div>
 
     </div>
 
-    <!-- INSIGHT -->
-    <div class="report-card">
+    <!-- BUDGET ANALYSIS -->
+    <div class="report-card mt-4">
 
         <h5 class="fw-bold mb-4">
-            Insight Keuangan
+            Analisis Budget 50 : 30 : 20
         </h5>
 
-        <div class="row g-4">
+        <!-- Primer -->
+        <div class="mb-4">
 
-            <div class="col-md-4">
-
-                <div class="insight-box">
-
-                    <i class="bi bi-graph-up-arrow text-success fs-3"></i>
-
-                    <h6 class="fw-bold mt-3">
-                        Pemasukan Naik
-                    </h6>
-
-                    <p class="text-muted mb-0">
-                        Pemasukan meningkat 12% dibanding bulan lalu.
-                    </p>
-
-                </div>
-
+            <div class="d-flex justify-content-between mb-2">
+                <span>Primer</span>
+                <span>Rp 1.300.000 / Rp 2.000.000</span>
             </div>
 
-            <div class="col-md-4">
-
-                <div class="insight-box">
-
-                    <i class="bi bi-exclamation-circle text-warning fs-3"></i>
-
-                    <h6 class="fw-bold mt-3">
-                        Makan Dominan
-                    </h6>
-
-                    <p class="text-muted mb-0">
-                        Pengeluaran terbesar berasal dari kategori makan.
-                    </p>
-
-                </div>
-
+            <div class="progress">
+                <div class="progress-bar bg-success" style="width:65%"></div>
             </div>
 
-            <div class="col-md-4">
+        </div>
 
-                <div class="insight-box">
+        <!-- Sekunder -->
+        <div class="mb-4">
 
-                    <i class="bi bi-piggy-bank text-success fs-3"></i>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Sekunder</span>
+                <span>Rp 1.000.000 / Rp 1.200.000</span>
+            </div>
 
-                    <h6 class="fw-bold mt-3">
-                        Menabung Baik
-                    </h6>
+            <div class="progress">
+                <div class="progress-bar bg-warning" style="width:83%"></div>
+            </div>
 
-                    <p class="text-muted mb-0">
-                        Anda berhasil menyimpan 35% dari pemasukan bulan ini.
-                    </p>
+        </div>
 
-                </div>
+        <!-- Tabungan -->
+        <div>
 
+            <div class="d-flex justify-content-between mb-2">
+                <span>Tabungan</span>
+                <span>Rp 400.000 / Rp 800.000</span>
+            </div>
+
+            <div class="progress">
+                <div class="progress-bar bg-primary" style="width:50%"></div>
             </div>
 
         </div>

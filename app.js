@@ -68,6 +68,10 @@ const getTransactionSummary = async () => {
     year: 'numeric'
  });
 
+// laporan pemasukan
+ const IncomeTransactions = transactions.filter(t => t.jenis === 'Pemasukan');
+ const ExpenseTransactions = transactions.filter(t => t.jenis === 'Pengeluaran');
+
   return {
     transactions,
     totalIncome,
@@ -76,7 +80,9 @@ const getTransactionSummary = async () => {
     balance,
     progress_pengeluaran,
     progress_pemasukan,
-    currentMonth
+    currentMonth,
+    IncomeTransactions,
+    ExpenseTransactions
   };
 };
 
@@ -226,15 +232,34 @@ app.post('/budgeting/goal', async (req, res) => {
 
 
 //route laporan
-app.get('/laporan', (req, res) => {
-  // res.send('Hello World!');
-  res.render('laporan', {
-    layout: 'layouts/main-layout',
-    nama: 'Zul Arsyl',
-    title: 'Halaman Laporan'
-  });
-});
+app.get('/laporan', async (req, res) => {
+  try {
+    const summary = await getTransactionSummary();
 
+    res.render('laporan', {
+      layout: 'layouts/main-layout',
+      nama: 'Zul Arsyl',
+      title: 'Halaman laporan',
+      ...summary
+    });
+  } catch (error) {
+    console.error('Error fetching home summary:', error);
+    res.render('laporan', {
+      layout: 'layouts/main-layout',
+      nama: 'Zul Arsyl',
+      title: 'Halaman Laporan',
+      transactions: [],
+      totalIncome: 0,
+      totalExpense: 0,
+      totalTransactions: 0,
+      balance: 0,
+      progress_pengeluaran: 0,
+      progress_pemasukan: 0,
+      IncomeTransactions,
+      ExpenseTransactions
+    });
+  }
+});
 
 //route transaksi
 app.get('/transaksi', async(req, res) => {
@@ -345,28 +370,12 @@ app.post('/transaksi/:id/delete', async (req, res) => {
         res.send('Gagal menghapus data');
     }
 });
-app.get('/about', (req, res) => {
-  const mahasiswa = [
-    {
-      nama: 'Zul Arsyl',
-      nim: '123456789'
-    },
-    {
-      nama: 'Zul madjid',
-      nim: '123456789'
-    }
-  ];
-
-  res.render('about', {mahasiswa});
-});
 
 app.get('/login', (req, res) => {
   res.sendFile(__dirname + '/login.html');
 });
 
-app.use('/produk/:id', (req, res) => {
-  res.send(`Produk id: ${req.params.id} Kategori: ${req.query.categorie}`);
-});
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
