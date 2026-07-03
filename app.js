@@ -71,6 +71,9 @@ const getTransactionSummary = async () => {
 // laporan pemasukan
  const IncomeTransactions = transactions.filter(t => t.jenis === 'Pemasukan');
  const ExpenseTransactions = transactions.filter(t => t.jenis === 'Pengeluaran');
+ const totalIncomeTransactions = IncomeTransactions.length;
+ const totalExpenseTransactions = ExpenseTransactions.length;
+ const TabunganReport = transactions.filter(t => t.kategori === 'Tabungan').reduce((total, transaksi) => total + transaksi.nominal, 0);
 
   return {
     transactions,
@@ -82,7 +85,10 @@ const getTransactionSummary = async () => {
     progress_pemasukan,
     currentMonth,
     IncomeTransactions,
-    ExpenseTransactions
+    ExpenseTransactions,
+    totalIncomeTransactions,
+    totalExpenseTransactions,
+    TabunganReport
   };
 };
 
@@ -256,7 +262,10 @@ app.get('/laporan', async (req, res) => {
       progress_pengeluaran: 0,
       progress_pemasukan: 0,
       IncomeTransactions,
-      ExpenseTransactions
+      ExpenseTransactions,
+      totalIncomeTransactions: 0,
+      totalExpenseTransactions: 0,
+      TabunganReport
     });
   }
 });
