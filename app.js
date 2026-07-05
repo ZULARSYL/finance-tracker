@@ -10,6 +10,7 @@ require('./utils/db');
 const Transactions = require('./model/transaction');
 const BudgetSetting = require('./model/budget-setting');
 const GoalSetting = require('./model/goal-setting');
+const Debt = require('./model/debt');
 const { calculateBudgetSummary, DEFAULT_RATIOS } = require('./utils/budgeting');
 
 const app = express();
@@ -44,6 +45,34 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.locals.currentPath = req.path;
   next();
+});
+
+// Middleware untuk fetch notifikasi hutang
+app.use(async (req, res, next) => {
+  try {
+    const debts = await Debt.find({ statusPembayaran: 'belum' }).sort({ tanggalJatuhTempo: 1 });
+    
+    // Detect hutang yang jatuh tempo dalam 3 hari ke depan
+    const now = new Date();
+    const threeRaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+    
+    const notificationDebts = debts.filter(d => {
+      const dueDate = new Date(d.tanggalJatuhTempo);
+      return dueDate <= threeRaysLater && dueDate >= now;
+    });
+    
+    res.locals.debts = debts;
+    res.locals.notificationDebts = notificationDebts;
+    res.locals.debtNotificationCount = notificationDebts.length;
+    
+    next();
+  } catch (error) {
+    console.error('Error fetching debts:', error);
+    res.locals.debts = [];
+    res.locals.notificationDebts = [];
+    res.locals.debtNotificationCount = 0;
+    next();
+  }
 });
 
 const getTransactionSummary = async () => {
@@ -499,7 +528,53 @@ app.get('/login', (req, res) => {
   res.sendFile(__dirname + '/login.html');
 });
 
+// ROUTES DEBT (Pengingat Hutang)
+// Tambah hutang
+app.post('/debt/add', async (req, res) => {
+  try {
+    const { nominal, deskripsi, tanggalJatuhTempo } = req.body;
 
+    const newDebt = new Debt({
+      nominal: Number(nominal),
+      deskripsi: deskripsi || 'Hutang',
+      tanggalJatuhTempo: new Date(tanggalJatuhTempo)
+    });
+
+    await newDebt.save();
+    req.flash('success', 'Hutang berhasil ditambahkan');
+    res.redirect(req.header('referer') || '/');
+  } catch (error) {
+    console.error('Error adding debt:', error);
+    req.flash('error', 'Gagal menambahkan hutang');
+    res.redirect(req.header('referer') || '/');
+  }
+});
+
+// Mark hutang sebagai sudah dibayar
+app.post('/debt/mark-paid/:id', async (req, res) => {
+  try {
+    await Debt.findByIdAndUpdate(req.params.id, { statusPembayaran: 'sudah' });
+    req.flash('success', 'Hutang berhasil ditandai sudah dibayar');
+    res.redirect(req.header('referer') || '/');
+  } catch (error) {
+    console.error('Error marking debt as paid:', error);
+    req.flash('error', 'Gagal memperbarui status hutang');
+    res.redirect(req.header('referer') || '/');
+  }
+});
+
+// Hapus hutang
+app.post('/debt/delete/:id', async (req, res) => {
+  try {
+    await Debt.findByIdAndDelete(req.params.id);
+    req.flash('success', 'Hutang berhasil dihapus');
+    res.redirect(req.header('referer') || '/');
+  } catch (error) {
+    console.error('Error deleting debt:', error);
+    req.flash('error', 'Gagal menghapus hutang');
+    res.redirect(req.header('referer') || '/');
+  }
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
