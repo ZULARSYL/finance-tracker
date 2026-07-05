@@ -240,13 +240,33 @@ app.post('/budgeting/goal', async (req, res) => {
 //route laporan
 app.get('/laporan', async (req, res) => {
   try {
+    const [settingsDoc, goalDoc, transactions] = await Promise.all([
+      BudgetSetting.findOne().sort({ createdAt: -1 }),
+      GoalSetting.findOne().sort({ createdAt: -1 }),
+      Transactions.find().sort({ tanggal: -1 })
+    ]);
+
     const summary = await getTransactionSummary();
+    const summary2 = calculateBudgetSummary(transactions, settingsDoc ? settingsDoc.ratios : DEFAULT_RATIOS);
+    const budgetSetting = await BudgetSetting.findOne();
+    const ratioPrimer = budgetSetting.ratios.primer;
+    const ratioSekunder = budgetSetting.ratios.sekunder;
+    const ratioTabungan = budgetSetting.ratios.tabungan;
 
     res.render('laporan', {
       layout: 'layouts/main-layout',
       nama: 'Zul Arsyl',
       title: 'Halaman laporan',
-      ...summary
+      ...summary,
+      ratios: summary2.ratios,
+      allocation: summary2.allocation,
+      used: summary2.used,
+      progressPrimerPercent: summary2.progress.primer,
+      progressSekunderPercent: summary2.progress.sekunder,
+      progressTabunganPercent: summary2.progress.tabungan,
+      ratioPrimer,
+      ratioSekunder,
+      ratioTabungan,
     });
   } catch (error) {
     console.error('Error fetching home summary:', error);
@@ -255,6 +275,13 @@ app.get('/laporan', async (req, res) => {
       nama: 'Zul Arsyl',
       title: 'Halaman Laporan',
       transactions: [],
+      allocation: { primer: 0, sekunder: 0, tabungan: 0 },
+      used: { primer: 0, sekunder: 0, tabungan: 0 },
+      usedTotal: 0,
+      remaining: 0,
+      usagePercent: 0,
+      progress: { primer: 0, sekunder: 0, tabungan: 0 },
+      ratios: DEFAULT_RATIOS,
       totalIncome: 0,
       totalExpense: 0,
       totalTransactions: 0,
@@ -265,7 +292,8 @@ app.get('/laporan', async (req, res) => {
       ExpenseTransactions,
       totalIncomeTransactions: 0,
       totalExpenseTransactions: 0,
-      TabunganReport
+      TabunganReport,
+      ratioTabungan
     });
   }
 });
@@ -389,4 +417,3 @@ app.get('/login', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
