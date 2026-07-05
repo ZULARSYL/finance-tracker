@@ -92,6 +92,66 @@ const getTransactionSummary = async () => {
   };
 };
 
+const getMonthlyChartData = (transactions = []) => {
+  // Get 12 months of data
+  const now = new Date();
+  const months = [];
+  const monthLabels = [];
+  const incomeByMonth = [];
+  const expenseByMonth = [];
+  
+  // Prepare data for last 12 months
+  for (let i = 11; i >= 0; i--) {
+    const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth();
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // Get month name
+    const monthName = monthDate.toLocaleDateString('id-ID', { month: 'short' });
+    monthLabels.push(monthName);
+    
+    // Filter and aggregate transactions for this month
+    const monthTransactions = transactions.filter(t => {
+      const date = new Date(t.tanggal);
+      return date >= firstDay && date <= lastDay;
+    });
+    
+    const income = monthTransactions
+      .filter(t => t.jenis === 'Pemasukan')
+      .reduce((sum, t) => sum + Number(t.nominal || 0), 0);
+    
+    const expense = monthTransactions
+      .filter(t => t.jenis === 'Pengeluaran')
+      .reduce((sum, t) => sum + Number(t.nominal || 0), 0);
+    
+    incomeByMonth.push(income);
+    expenseByMonth.push(expense);
+  }
+  
+  return {
+    labels: monthLabels,
+    datasets: [
+      {
+        label: 'Pemasukan',
+        data: incomeByMonth,
+        backgroundColor: '#0A5C15',
+        borderRadius: 8,
+        borderSkipped: false
+      },
+      {
+        label: 'Pengeluaran',
+        data: expenseByMonth,
+        backgroundColor: '#64b5e6',
+        borderRadius: 8,
+        borderSkipped: false
+      }
+    ]
+  };
+};
+
 //route home
 app.get('/', async (req, res) => {
   try {
@@ -252,6 +312,7 @@ app.get('/laporan', async (req, res) => {
     const ratioPrimer = budgetSetting.ratios.primer;
     const ratioSekunder = budgetSetting.ratios.sekunder;
     const ratioTabungan = budgetSetting.ratios.tabungan;
+    const chartData = getMonthlyChartData(transactions);
 
     res.render('laporan', {
       layout: 'layouts/main-layout',
@@ -267,9 +328,29 @@ app.get('/laporan', async (req, res) => {
       ratioPrimer,
       ratioSekunder,
       ratioTabungan,
+      chartData: JSON.stringify(chartData)
     });
   } catch (error) {
     console.error('Error fetching home summary:', error);
+    const emptyChartData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      datasets: [
+        { 
+          label: 'Pemasukan', 
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+          backgroundColor: '#0A5C15',
+          borderRadius: 8,
+          borderSkipped: false
+        },
+        { 
+          label: 'Pengeluaran', 
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+          backgroundColor: '#64b5e6',
+          borderRadius: 8,
+          borderSkipped: false
+        }
+      ]
+    };
     res.render('laporan', {
       layout: 'layouts/main-layout',
       nama: 'Zul Arsyl',
@@ -288,12 +369,18 @@ app.get('/laporan', async (req, res) => {
       balance: 0,
       progress_pengeluaran: 0,
       progress_pemasukan: 0,
-      IncomeTransactions,
-      ExpenseTransactions,
+      IncomeTransactions: [],
+      ExpenseTransactions: [],
       totalIncomeTransactions: 0,
       totalExpenseTransactions: 0,
-      TabunganReport,
-      ratioTabungan
+      TabunganReport: 0,
+      ratioTabungan: 20,
+      ratioPrimer: 50,
+      ratioSekunder: 30,
+      progressPrimerPercent: 0,
+      progressSekunderPercent: 0,
+      progressTabunganPercent: 0,
+      chartData: JSON.stringify(emptyChartData)
     });
   }
 });
