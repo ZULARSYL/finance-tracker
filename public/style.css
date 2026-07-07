@@ -1,3 +1,187 @@
+:root{
+    --primary: #0A5C15;
+    --primary-light: #EAF8EC;
+    --bg: #F7F9F8;
+    --muted: #6c757d;
+}
+
+body{
+    font-family: 'Poppins', sans-serif;
+    background: var(--primary-light);
+}
+
+/* Login Page */
+.login-body{ background: var(--primary-light); }
+.login-left{
+    flex: .9;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 55px;
+    background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--primary) 45%,
+        var(--primary) 100%
+    );
+}
+.login-overlay{ position:absolute; inset:0; opacity:0.06; }
+.login-content{
+    position: relative;
+    z-index: 2;
+
+    width:100%;
+    max-width:430px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+}
+.logo-circle{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:#fff;
+    color:#198754;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:24px;
+}
+.logo-area{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:45px;
+}
+.hero-title{
+    font-size:2.3rem;
+    font-weight:700;
+    line-height:1.3;
+    margin-bottom:18px;
+}
+.hero-title span{ color: #FFD54F; }
+.hero-content .badge{
+    font-size:.8rem;
+    font-weight:500;
+}
+.hero-feature{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+/* .feature-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:12px 15px;
+
+    border-radius:12px;
+
+    background:var(--primary-light);
+
+    backdrop-filter:blur(10px);
+
+    font-size:14px;
+} */
+
+.feature-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 12px 15px;
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+    color: var(--primary-light);
+    font-size: 14px;
+
+    transition: all .3s ease;
+}
+
+.feature-item:hover{
+    transform: translateY(-4px);
+
+    background: rgba(255, 255, 255, 0.22);
+
+    border-color: rgba(255, 255, 255, 0.4);
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+
+.login-right{ background: transparent; }
+.login-card{ width:100%; max-width:420px; background:white; padding:28px; border-radius:12px; box-shadow: 0 8px 30px rgba(10,92,21,0.08); }
+
+/* Centered white card wrapper */
+.login-bg{ background: linear-gradient(135deg, rgba(10,92,21,0.06), rgba(6,150,72,0.04)); }
+.center-card{
+    width: min(1000px, 92%);
+    min-height: 560px;
+    max-height: 620px;
+
+    display: flex;
+    overflow: hidden;
+
+    border-radius: 24px;
+    background: #fff;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,.12);
+}
+.center-card .left{ flex: 1.4; min-width: 320px; }
+.right{
+    flex:1.1;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:55px;
+}
+
+.login-wrapper{
+    width:100%;
+    max-width:420px;
+}
+
+@media (max-width: 991px){
+    .center-card{ flex-direction: column; width: 95%; }
+    .center-card .left{ display: none; }
+    .login-card{ border-radius: 12px; box-shadow: 0 8px 24px rgba(10,92,21,0.06); }
+}
+.mobile-logo{ width:56px; height:56px; border-radius:12px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; }
+.btn-login{ background:var(--primary); color:#fff; border:none; padding:10px 14px; border-radius:8px; }
+.btn-login:hover{ background:#0b6e18; }
+.input-group-text{ background:#f7f7f7; border-radius:8px 0 0 8px; }
+
+@media (max-width: 991px){
+    .login-left{ display:none !important; }
+}
+
+/* small helpers */
+.text-success{ color:var(--primary) !important; }
 /* :root{
     --primary:#0A5C15;
     --primary-light:#EAF8EC;

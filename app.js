@@ -5,6 +5,8 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 require('./utils/db');
+const bcrypt = require('bcryptjs');
+const User = require('./model/user');
 
 
 const Transactions = require('./model/transaction');
@@ -20,12 +22,17 @@ app.use(express.urlencoded({ extended: true }));
 //ejs
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
+const path = require('path');
+
+// serve static assets from /public
+app.use(express.static(path.join(__dirname, 'public')));
 
 //konfigurasi flash
 app.use(cookieParser('secret'));
+// session cookie set to 3 days
 app.use(
   session({
-    cookie: { maxAge: 6000 },
+    cookie: { maxAge: 3 * 24 * 60 * 60 * 1000 },
     secret: 'secret',
     resave: true,
     saveUninitialized: true,
@@ -38,6 +45,26 @@ app.use((req, res, next) => {
     success: req.flash('success'),
     error: req.flash('error')
   };
+  next();
+});
+
+// expose current user to views
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session.user || null;
+  next();
+});
+
+// simple auth middleware: allow /login, static assets, otherwise require session
+app.use((req, res, next) => {
+  const openPaths = ['/login', '/logout'];
+  if (openPaths.includes(req.path) || req.path.startsWith('/public') || req.path.startsWith('/assets') || req.path.startsWith('/css') || req.path.startsWith('/js')) {
+    return next();
+  }
+
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
   next();
 });
 
@@ -524,9 +551,57 @@ app.post('/transaksi/:id/delete', async (req, res) => {
     }
 });
 
+// render login page
 app.get('/login', (req, res) => {
-  res.sendFile(__dirname + '/login.html');
+  res.render('login', { layout: false, title: 'Login' });
 });
+
+// handle login post
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      req.flash('error', 'Username atau password salah');
+      return res.redirect('/login');
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      req.flash('error', 'Username atau password salah');
+      return res.redirect('/login');
+    }
+
+    req.session.user = { id: user._id.toString(), username: user.username };
+    req.flash('success', 'Berhasil login');
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Terjadi kesalahan pada server');
+    res.redirect('/login');
+  }
+});
+
+// logout
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    res.redirect('/login');
+  });
+});
+
+// ensure there is at least one default admin user
+(async () => {
+  try {
+    const count = await User.countDocuments();
+    if (count === 0) {
+      const hash = await bcrypt.hash('admin', 10);
+      await User.create({ username: 'admin', password: hash });
+      console.log('Default admin user created (username: admin, password: admin)');
+    }
+  } catch (err) {
+    console.error('Error ensuring default user:', err);
+  }
+})();
 
 // ROUTES DEBT (Pengingat Hutang)
 // Tambah hutang
@@ -576,6 +651,21 @@ app.post('/debt/delete/:id', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+// start server with simple retry on EADDRINUSE (try next port)
+const startServer = (p) => {
+  const srv = app.listen(p, () => {
+    console.log(`Example app listening on port ${p}`);
+  });
+
+  srv.on('error', (err) => {
+    if (err && err.code === 'EADDRINUSE') {
+      console.warn(`Port ${p} in use, trying port ${p + 1}...`);
+      setTimeout(() => startServer(p + 1), 200);
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+};
+
+startServer(port);

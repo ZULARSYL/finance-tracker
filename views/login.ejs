@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title><%= title || 'Login' %></title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+
+<body class="login-body">
+
+<div class="container-fluid vh-100 login-bg">
+    <div class="d-flex align-items-center justify-content-center h-100">
+
+        <div class="center-card">
+
+            <div class="left login-left">
+                <div class="login-overlay"></div>
+                <div class="login-content">
+                    <div class="logo-area">
+                        <div class="logo-circle">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-white">Personal Tracker</h4>
+                        </div>
+                    </div>
+
+                    <div class="hero-content">
+                        <span class="badge bg-light text-success mb-4 px-3 py-2 rounded-pill">Kelola Keuangan Lebih Bijak</span>
+                        <h1 class="hero-title text-white">Selamat Datang di<br><span>Finance Tracker</span></h1>
+                        <div class="hero-feature mt-5">
+                            <div class="feature-item"><i class="bi bi-check-circle-fill"></i><span>Monitoring Keuangan</span></div>
+                            <div class="feature-item"><i class="bi bi-check-circle-fill"></i><span>Budgeting 50 : 30 : 20</span></div>
+                            <div class="feature-item"><i class="bi bi-check-circle-fill"></i><span>Laporan Otomatis</span></div>
+                            <div class="feature-item"><i class="bi bi-check-circle-fill"></i><span>Reminder Hutang</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right">
+            <div class="login-wrapper">
+
+                <div class="text-center mb-4">
+                    <div class="mobile-logo d-lg-none">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <h2 class="fw-bold mb-2">Login</h2>
+                    <p class="text-muted mb-0">
+                        Masukkan username dan password Anda.
+                    </p>
+                </div>
+
+                <% if(messages && messages.error && messages.error.length){ %>
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <%= messages.error[0] %>
+                    </div>
+                <% } %>
+
+                <% if(messages && messages.success && messages.success.length){ %>
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <%= messages.success[0] %>
+                    </div>
+                <% } %>
+
+                <form action="/login" method="POST">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Username
+                        </label>
+
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="username"
+                                placeholder="Masukkan Username"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Password
+                        </label>
+
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="password"
+                                name="password"
+                                placeholder="Masukkan Password"
+                                required>
+
+                            <button
+                                class="btn btn-outline-secondary"
+                                type="button"
+                                id="togglePassword">
+
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="remember">
+
+                            <label
+                                class="form-check-label"
+                                for="remember">
+
+                                Remember Me
+                            </label>
+                        </div>
+                    </div> -->
+
+                    <button
+                        class="btn btn-login w-100"
+                        type="submit">
+
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Login
+                    </button>
+
+                </form>
+<!-- 
+                <div class="text-center my-4">
+                    <hr>
+                </div> -->
+
+                <div class="text-center">
+                    <small class="text-muted d-block mb-2">
+                        Demo Login
+                    </small>
+
+                    <div>
+                        <strong>Username :</strong> admin
+                    </div>
+
+                    <div>
+                        <strong>Password :</strong> admin
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Show Password -->
+
+<script>
+
+const togglePassword = document.getElementById("togglePassword");
+
+const password = document.getElementById("password");
+
+togglePassword.addEventListener("click", function(){
+
+    const type = password.getAttribute("type") === "password"
+        ? "text"
+        : "password";
+
+    password.setAttribute("type", type);
+
+    this.innerHTML = type === "password"
+        ? '<i class="bi bi-eye"></i>'
+        : '<i class="bi bi-eye-slash"></i>';
+
+});
+
+</script>
+
+</body>
+
+</html>

@@ -7,6 +7,8 @@
     "express-ejs-layouts": "^2.5.0",
     "express-session": "^1.17.2",
     "mongoose": "^5.12.13"
+    ,
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
