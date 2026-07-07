@@ -54,9 +54,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// simple auth middleware: allow /login, static assets, otherwise require session
+// simple auth middleware: allow /login, /register, static assets, otherwise require session
 app.use((req, res, next) => {
-  const openPaths = ['/login', '/logout'];
+  const openPaths = ['/login', '/logout', '/register'];
   if (openPaths.includes(req.path) || req.path.startsWith('/public') || req.path.startsWith('/assets') || req.path.startsWith('/css') || req.path.startsWith('/js')) {
     return next();
   }
@@ -77,7 +77,14 @@ app.use((req, res, next) => {
 // Middleware untuk fetch notifikasi hutang
 app.use(async (req, res, next) => {
   try {
-    const debts = await Debt.find({ statusPembayaran: 'belum' }).sort({ tanggalJatuhTempo: 1 });
+    if (!req.session.user) {
+      res.locals.debts = [];
+      res.locals.notificationDebts = [];
+      res.locals.debtNotificationCount = 0;
+      return next();
+    }
+
+    const debts = await Debt.find({ user: req.session.user.id, statusPembayaran: 'belum' }).sort({ tanggalJatuhTempo: 1 });
     
     // Detect hutang yang jatuh tempo dalam 3 hari ke depan
     const now = new Date();
@@ -102,8 +109,8 @@ app.use(async (req, res, next) => {
   }
 });
 
-const getTransactionSummary = async () => {
-  const transactions = await Transactions.find().sort({ tanggal: -1 });
+const getTransactionSummary = async (userId) => {
+  const transactions = await Transactions.find({ user: userId }).sort({ tanggal: -1 });
 
   const totalIncome = transactions
     .filter(t => t.jenis === 'Pemasukan')
@@ -211,7 +218,7 @@ const getMonthlyChartData = (transactions = []) => {
 //route home
 app.get('/', async (req, res) => {
   try {
-    const summary = await getTransactionSummary();
+    const summary = await getTransactionSummary(req.session.user.id);
 
     res.render('index', {
       layout: 'layouts/main-layout',
@@ -240,9 +247,9 @@ app.get('/', async (req, res) => {
 app.get('/budgeting', async (req, res) => {
   try {
     const [settingsDoc, goalDoc, transactions] = await Promise.all([
-      BudgetSetting.findOne().sort({ createdAt: -1 }),
-      GoalSetting.findOne().sort({ createdAt: -1 }),
-      Transactions.find().sort({ tanggal: -1 })
+      BudgetSetting.findOne({ user: req.session.user.id }),
+      GoalSetting.findOne({ user: req.session.user.id }),
+      Transactions.find({ user: req.session.user.id }).sort({ tanggal: -1 })
     ]);
 
     const summary = calculateBudgetSummary(transactions, settingsDoc ? settingsDoc.ratios : DEFAULT_RATIOS);
@@ -316,8 +323,8 @@ app.post('/budgeting/ratio', async (req, res) => {
     }
 
     await BudgetSetting.findOneAndUpdate(
-      {},
-      { ratios },
+      { user: req.session.user.id },
+      { user: req.session.user.id, ratios },
       { upsert: true, new: true }
     );
 
@@ -335,8 +342,9 @@ app.post('/budgeting/goal', async (req, res) => {
     const { title, target } = req.body;
 
     await GoalSetting.findOneAndUpdate(
-      {},
+      { user: req.session.user.id },
       {
+        user: req.session.user.id,
         title: title || 'Target Menabung',
         target: Number(target || 0)
       },
@@ -357,14 +365,14 @@ app.post('/budgeting/goal', async (req, res) => {
 app.get('/laporan', async (req, res) => {
   try {
     const [settingsDoc, goalDoc, transactions] = await Promise.all([
-      BudgetSetting.findOne().sort({ createdAt: -1 }),
-      GoalSetting.findOne().sort({ createdAt: -1 }),
-      Transactions.find().sort({ tanggal: -1 })
+      BudgetSetting.findOne({ user: req.session.user.id }),
+      GoalSetting.findOne({ user: req.session.user.id }),
+      Transactions.find({ user: req.session.user.id }).sort({ tanggal: -1 })
     ]);
 
-    const summary = await getTransactionSummary();
+    const summary = await getTransactionSummary(req.session.user.id);
     const summary2 = calculateBudgetSummary(transactions, settingsDoc ? settingsDoc.ratios : DEFAULT_RATIOS);
-    const budgetSetting = await BudgetSetting.findOne();
+    const budgetSetting = await BudgetSetting.findOne({ user: req.session.user.id });
     const ratioPrimer = budgetSetting.ratios.primer;
     const ratioSekunder = budgetSetting.ratios.sekunder;
     const ratioTabungan = budgetSetting.ratios.tabungan;
@@ -444,7 +452,7 @@ app.get('/laporan', async (req, res) => {
 //route transaksi
 app.get('/transaksi', async(req, res) => {
   try {
-    const summary = await getTransactionSummary();
+    const summary = await getTransactionSummary(req.session.user.id);
 
     res.render('transaksi', {
       layout: 'layouts/main-layout',
@@ -470,7 +478,7 @@ app.get('/transaksi', async(req, res) => {
 
 app.get('/api/transaksi/:id', async(req, res) => {
   try {
-    const transaction = await Transactions.findById(req.params.id);
+    const transaction = await Transactions.findOne({ _id: req.params.id, user: req.session.user.id });
 
     if (!transaction) {
       return res.status(404).json({ message: 'Transaksi tidak ditemukan' });
@@ -488,6 +496,7 @@ app.post('/transaksi/pemasukan', async (req, res) => {
         const { kategori, jenis, nominal, tanggal, catatan } = req.body;
 
         await Transactions.create({
+            user: req.session.user.id,
             kategori,
             jenis,
             nominal: Number(nominal),
@@ -507,6 +516,7 @@ app.post('/transaksi/pengeluaran', async (req, res) => {
         const { kategori, jenis, nominal, tanggal, catatan } = req.body;
 
         await Transactions.create({
+            user: req.session.user.id,
             kategori,
             jenis,
             nominal: Number(nominal),
@@ -525,13 +535,17 @@ app.post('/transaksi/:id/edit', async (req, res) => {
     try {
         const { kategori, jenis, nominal, tanggal, catatan } = req.body;
 
-        await Transactions.findByIdAndUpdate(req.params.id, {
-            kategori,
-            jenis,
-            nominal: Number(nominal),
-            tanggal,
-            catatan
-        }, { new: true });
+        await Transactions.findOneAndUpdate(
+            { _id: req.params.id, user: req.session.user.id },
+            {
+                kategori,
+                jenis,
+                nominal: Number(nominal),
+                tanggal,
+                catatan
+            },
+            { new: true }
+        );
 
         res.redirect('/transaksi');
     } catch (error) {
@@ -542,7 +556,7 @@ app.post('/transaksi/:id/edit', async (req, res) => {
 
 app.post('/transaksi/:id/delete', async (req, res) => {
     try {
-        await Transactions.findByIdAndDelete(req.params.id);
+        await Transactions.findOneAndDelete({ _id: req.params.id, user: req.session.user.id });
 
         res.redirect('/transaksi');
     } catch (err) {
@@ -603,6 +617,39 @@ app.get('/logout', (req, res) => {
   }
 })();
 
+//ROUTES REGISTER
+app.get('/register', (req, res) => {
+  res.render('register', { layout: false, title: 'Register' });
+});
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    req.flash('error', 'Username dan password wajib diisi');
+    return res.redirect('/register');
+  }
+
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      req.flash('error', 'Username sudah terdaftar');
+      return res.redirect('/register');
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ username, password: hash });
+
+    req.session.user = { id: newUser._id.toString(), username: newUser.username };
+    req.flash('success', 'Akun berhasil dibuat dan Anda telah login');
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Terjadi kesalahan saat membuat akun');
+    res.redirect('/register');
+  }
+});
+
 // ROUTES DEBT (Pengingat Hutang)
 // Tambah hutang
 app.post('/debt/add', async (req, res) => {
@@ -610,6 +657,7 @@ app.post('/debt/add', async (req, res) => {
     const { nominal, deskripsi, tanggalJatuhTempo } = req.body;
 
     const newDebt = new Debt({
+      user: req.session.user.id,
       nominal: Number(nominal),
       deskripsi: deskripsi || 'Hutang',
       tanggalJatuhTempo: new Date(tanggalJatuhTempo)
@@ -628,7 +676,10 @@ app.post('/debt/add', async (req, res) => {
 // Mark hutang sebagai sudah dibayar
 app.post('/debt/mark-paid/:id', async (req, res) => {
   try {
-    await Debt.findByIdAndUpdate(req.params.id, { statusPembayaran: 'sudah' });
+    await Debt.findOneAndUpdate(
+      { _id: req.params.id, user: req.session.user.id },
+      { statusPembayaran: 'sudah' }
+    );
     req.flash('success', 'Hutang berhasil ditandai sudah dibayar');
     res.redirect(req.header('referer') || '/');
   } catch (error) {
@@ -641,7 +692,7 @@ app.post('/debt/mark-paid/:id', async (req, res) => {
 // Hapus hutang
 app.post('/debt/delete/:id', async (req, res) => {
   try {
-    await Debt.findByIdAndDelete(req.params.id);
+    await Debt.findOneAndDelete({ _id: req.params.id, user: req.session.user.id });
     req.flash('success', 'Hutang berhasil dihapus');
     res.redirect(req.header('referer') || '/');
   } catch (error) {
