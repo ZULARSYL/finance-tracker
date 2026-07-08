@@ -1,6 +1,9 @@
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 
+//deklarasi pupptear
+const puppeteer = require('puppeteer');
+
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
@@ -831,6 +834,133 @@ app.post('/debt/delete/:id', async (req, res) => {
     req.flash('error', 'Gagal menghapus hutang');
     res.redirect(req.header('referer') || '/');
   }
+});
+
+
+//Laporan export
+app.get('/laporan/export', async (req, res) => {
+  try {
+
+    const { month } = req.query;
+
+    // Ambil data
+    const [settingsDoc, goalDoc, transactions] = await Promise.all([
+      BudgetSetting.findOne({ user: req.session.user.id }),
+      GoalSetting.findOne({ user: req.session.user.id }),
+      Transactions.find({ user: req.session.user.id }).sort({ tanggal: -1 })
+    ]);
+
+    const budgetSetting = settingsDoc || {
+      ratios: DEFAULT_RATIOS
+    };
+
+    const summary = await getTransactionSummary(req.session.user.id, {
+      month
+    });
+
+    const summary2 = calculateBudgetSummary(
+      transactions,
+      budgetSetting.ratios,
+      month
+    );
+
+    const ratioPrimer = budgetSetting.ratios.primer;
+    const ratioSekunder = budgetSetting.ratios.sekunder;
+    const ratioTabungan = budgetSetting.ratios.tabungan;
+
+    // Render EJS menjadi HTML
+    app.render(
+      'laporan-pdf',
+      {
+        layout: false,
+
+        ...summary,
+
+        ratios: summary2.ratios,
+
+        allocation: summary2.allocation,
+
+        used: summary2.used,
+
+        progressPrimerPercent: summary2.progress.primer,
+
+        progressSekunderPercent: summary2.progress.sekunder,
+
+        progressTabunganPercent: summary2.progress.tabungan,
+
+        ratioPrimer,
+
+        ratioSekunder,
+
+        ratioTabungan
+
+      },
+      async (err, html) => {
+
+        if (err) {
+          console.log(err);
+          return res.status(500).send("Gagal membuat PDF");
+        }
+
+        console.log(html);
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        });
+
+        const page = await browser.newPage();
+
+        await page.setContent(html, {
+          waitUntil: "networkidle0"
+        });
+
+        const pdf = await page.pdf({
+
+          format: "A4",
+
+          printBackground: true,
+
+          margin: {
+            top: "20px",
+            bottom: "20px",
+            left: "20px",
+            right: "20px"
+          }
+
+        });
+
+        await browser.close();
+
+        res.set({
+          "Content-Type": "application/pdf",
+          "Content-Disposition":
+            `attachment; filename=Laporan-${month || "bulan-ini"}.pdf`
+        });
+
+        const fs = require("fs");
+
+        fs.writeFileSync("laporan-test.pdf", pdf);
+
+        console.log("PDF berhasil dibuat");
+        res.writeHead(200, {
+            "Content-Type": "application/pdf",
+            "Content-Length": pdf.length,
+            "Content-Disposition":
+                `attachment; filename=laporan.pdf`
+        });
+
+        res.end(pdf);
+      }
+    );
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).send("Gagal membuat PDF");
+
+  }
+
 });
 
 // start server with simple retry on EADDRINUSE (try next port)

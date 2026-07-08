@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<style>
+
+body{
+
+    font-family:Arial;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th,td{
+
+    border:1px solid #ccc;
+
+    padding:8px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Laporan Keuangan Bulanan</h2>
+
+<h3>Ringkasan</h3>
+
+<table>
+
+<tr>
+
+<td>Total Pemasukan</td>
+
+<td>Rp <%= totalIncome.toLocaleString("id-ID") %></td>
+
+</tr>
+
+<tr>
+
+<td>Total Pengeluaran</td>
+
+<td>Rp <%= totalExpense.toLocaleString("id-ID") %></td>
+
+</tr>
+
+<tr>
+
+<td>Saldo</td>
+
+<td>Rp <%= balance.toLocaleString("id-ID") %></td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>

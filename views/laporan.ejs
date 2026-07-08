@@ -191,8 +191,10 @@
             </form>
 
             <button class="btn btn-outline-danger">
-                <i class="bi bi-file-earmark-pdf me-2"></i>
-                Export PDF
+                <a href="/laporan/export?month=<%= filters.month %>" class="text-decoration-none text-danger">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>
+                    Export PDF
+                </a>
             </button>
         </div>
 
