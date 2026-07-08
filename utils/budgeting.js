@@ -32,11 +32,40 @@ const getBudgetExpenseAmount = (transaction) => {
   return transaction.jenis === 'Pengeluaran' ? Number(transaction.nominal || 0) : 0;
 };
 
-const calculateBudgetSummary = (transactions = [], settings = {}) => {
+const calculateBudgetSummary = (transactions = [], settings = {}, month = null) => {
   const ratios = normalizeRatios(settings);
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  // const now = new Date();
+  // const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  // const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  let start;
+  let end;
+  let currentDate;
+
+  if (month) {
+
+      currentDate = new Date(month + "-01");
+
+  } else {
+
+      currentDate = new Date();
+
+  }
+
+  start = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+  );
+
+  end = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999
+  );
 
   const monthTransactions = (transactions || []).filter((transaction) => {
     const date = new Date(transaction.tanggal);
@@ -89,7 +118,11 @@ const calculateBudgetSummary = (transactions = [], settings = {}) => {
     goalTarget,
     goalCurrent,
     goalPercent,
-    currentMonthLabel: now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
+    // currentMonthLabel: now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
+    currentMonthLabel: currentDate.toLocaleDateString('id-ID', {
+    month: 'long',
+    year: 'numeric'
+    }),
     insight: {
       primer: used.primer <= allocation.primer ? 'Pengeluaran primer masih aman.' : 'Primer sudah melewati batas budget.',
       sekunder: progress.sekunder >= 80 ? 'Budget sekunder sudah banyak digunakan.' : 'Budget sekunder masih terkontrol.',

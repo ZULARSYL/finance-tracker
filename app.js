@@ -398,6 +398,7 @@ app.post('/budgeting/goal', async (req, res) => {
 //route laporan
 app.get('/laporan', async (req, res) => {
   try {
+    const { month } = req.query;
     const [settingsDoc, goalDoc, transactions] = await Promise.all([
       BudgetSetting.findOne({ user: req.session.user.id }),
       GoalSetting.findOne({ user: req.session.user.id }),
@@ -405,8 +406,13 @@ app.get('/laporan', async (req, res) => {
     ]);
 
     const budgetSetting = settingsDoc || { ratios: DEFAULT_RATIOS };
-    const summary = await getTransactionSummary(req.session.user.id);
-    const summary2 = calculateBudgetSummary(transactions, budgetSetting.ratios);
+    const summary = await getTransactionSummary(req.session.user.id, { month });
+    // const summary2 = calculateBudgetSummary(transactions, budgetSetting.ratios);
+    const summary2 = calculateBudgetSummary(
+    transactions,
+    budgetSetting.ratios,
+    month
+    );
     const ratioPrimer = budgetSetting.ratios.primer;
     const ratioSekunder = budgetSetting.ratios.sekunder;
     const ratioTabungan = budgetSetting.ratios.tabungan;
@@ -426,7 +432,10 @@ app.get('/laporan', async (req, res) => {
       ratioPrimer,
       ratioSekunder,
       ratioTabungan,
-      chartData: JSON.stringify(chartData)
+      chartData: JSON.stringify(chartData),
+      filters: {
+        month: month || ''
+      }
     });
   } catch (error) {
     console.error('Error fetching home summary:', error);
@@ -478,7 +487,10 @@ app.get('/laporan', async (req, res) => {
       progressPrimerPercent: 0,
       progressSekunderPercent: 0,
       progressTabunganPercent: 0,
-      chartData: JSON.stringify(emptyChartData)
+      chartData: JSON.stringify(emptyChartData),
+      filters: {
+        month: ''
+      }
     });
   }
 });
