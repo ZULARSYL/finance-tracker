@@ -370,9 +370,9 @@ app.get('/laporan', async (req, res) => {
       Transactions.find({ user: req.session.user.id }).sort({ tanggal: -1 })
     ]);
 
+    const budgetSetting = settingsDoc || { ratios: DEFAULT_RATIOS };
     const summary = await getTransactionSummary(req.session.user.id);
-    const summary2 = calculateBudgetSummary(transactions, settingsDoc ? settingsDoc.ratios : DEFAULT_RATIOS);
-    const budgetSetting = await BudgetSetting.findOne({ user: req.session.user.id });
+    const summary2 = calculateBudgetSummary(transactions, budgetSetting.ratios);
     const ratioPrimer = budgetSetting.ratios.primer;
     const ratioSekunder = budgetSetting.ratios.sekunder;
     const ratioTabungan = budgetSetting.ratios.tabungan;
@@ -616,6 +616,87 @@ app.get('/logout', (req, res) => {
     console.error('Error ensuring default user:', err);
   }
 })();
+
+app.get('/settings_profile', async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      req.flash('error', 'Pengguna tidak ditemukan');
+      return res.redirect('/');
+    }
+
+    res.render('settings_profile', {
+      layout: 'layouts/main-layout',
+      title: 'Settings Profile',
+      user
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Terjadi kesalahan saat mengambil data profil');
+    res.redirect('/');
+  }
+});
+
+app.post('/settings_profile', async (req, res) => {
+  const { username, currentPassword, newPassword, confirmPassword } = req.body;
+
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      req.flash('error', 'Pengguna tidak ditemukan');
+      return res.redirect('/settings_profile');
+    }
+
+    if (!username) {
+      req.flash('error', 'Username tidak boleh kosong');
+      return res.redirect('/settings_profile');
+    }
+
+    if (username !== user.username) {
+      const existing = await User.findOne({ username });
+      if (existing) {
+        req.flash('error', 'Username sudah digunakan oleh pengguna lain');
+        return res.redirect('/settings_profile');
+      }
+    }
+
+    if (newPassword || confirmPassword || currentPassword) {
+      if (!currentPassword) {
+        req.flash('error', 'Password saat ini diperlukan untuk mengganti password');
+        return res.redirect('/settings_profile');
+      }
+
+      const match = await bcrypt.compare(currentPassword, user.password);
+      if (!match) {
+        req.flash('error', 'Password saat ini salah');
+        return res.redirect('/settings_profile');
+      }
+
+      if (!newPassword) {
+        req.flash('error', 'Password baru tidak boleh kosong');
+        return res.redirect('/settings_profile');
+      }
+
+      if (newPassword !== confirmPassword) {
+        req.flash('error', 'Konfirmasi password baru tidak cocok');
+        return res.redirect('/settings_profile');
+      }
+
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    user.username = username;
+    await user.save();
+
+    req.session.user.username = user.username;
+    req.flash('success', 'Perubahan profil berhasil disimpan');
+    res.redirect('/settings_profile');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Terjadi kesalahan saat menyimpan perubahan');
+    res.redirect('/settings_profile');
+  }
+});
 
 //ROUTES REGISTER
 app.get('/register', (req, res) => {

@@ -1,0 +1,66 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-white border-0">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h4 class="mb-1">Pengaturan Akun</h4>
+                <p class="text-muted mb-0">Ubah username atau password Anda di halaman ini.</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <% if (messages && messages.error && messages.error.length) { %>
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <%= messages.error[0] %>
+            </div>
+        <% } %>
+
+        <% if (messages && messages.success && messages.success.length) { %>
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle me-2"></i>
+                <%= messages.success[0] %>
+            </div>
+        <% } %>
+
+        <form action="/settings_profile" method="POST">
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="username" class="form-control" value="<%= user.username %>" required>
+                </div>
+                <small class="text-muted">Username digunakan untuk login ke aplikasi Anda.</small>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Password Saat Ini</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" name="currentPassword" class="form-control" placeholder="Masukkan password saat ini jika ingin mengganti password">
+                </div>
+                <small class="text-muted">Isi hanya jika ingin mengganti password.</small>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Password Baru</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                    <input type="password" name="newPassword" class="form-control" placeholder="Masukkan password baru">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Konfirmasi Password Baru</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                    <input type="password" name="confirmPassword" class="form-control" placeholder="Ulangi password baru">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="/" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
