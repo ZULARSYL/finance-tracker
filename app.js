@@ -109,8 +109,40 @@ app.use(async (req, res, next) => {
   }
 });
 
-const getTransactionSummary = async (userId) => {
-  const transactions = await Transactions.find({ user: userId }).sort({ tanggal: -1 });
+const getTransactionSummary = async (userId, filters = {}) => {
+  const { month, search } = filters;
+  const query = { user: userId };
+
+  let startDate;
+  let endDate;
+  if (month) {
+    const [year, monthIndex] = month.split('-').map(Number);
+    if (!Number.isNaN(year) && !Number.isNaN(monthIndex)) {
+      startDate = new Date(year, monthIndex - 1, 1);
+      endDate = new Date(year, monthIndex, 0, 23, 59, 59, 999);
+    }
+  }
+
+  if (!startDate || !endDate) {
+    const now = new Date();
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  }
+
+  query.tanggal = { $gte: startDate, $lte: endDate };
+
+  if (search && search.trim()) {
+    const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'i');
+
+    query.$or = [
+      { kategori: regex },
+      { catatan: regex },
+      { jenis: regex }
+    ];
+  }
+
+  const transactions = await Transactions.find(query).sort({ tanggal: -1 });
 
   const totalIncome = transactions
     .filter(t => t.jenis === 'Pemasukan')
@@ -125,18 +157,16 @@ const getTransactionSummary = async (userId) => {
   const progress_pengeluaran = totalExpense !== 0 ? (totalExpense / totalIncome) * 100 : 0;
   const progress_pemasukan = totalIncome !== 0 ? balance / totalIncome * 100 : 0;
 
-// menampilkan bulan untuk sekarang
-  const currentMonth = new Date().toLocaleDateString('id-ID', { 
-    month: 'long', 
+  const currentMonth = startDate.toLocaleDateString('id-ID', {
+    month: 'long',
     year: 'numeric'
- });
+  });
 
-// laporan pemasukan
- const IncomeTransactions = transactions.filter(t => t.jenis === 'Pemasukan');
- const ExpenseTransactions = transactions.filter(t => t.jenis === 'Pengeluaran');
- const totalIncomeTransactions = IncomeTransactions.length;
- const totalExpenseTransactions = ExpenseTransactions.length;
- const TabunganReport = transactions.filter(t => t.kategori === 'Tabungan').reduce((total, transaksi) => total + transaksi.nominal, 0);
+  const IncomeTransactions = transactions.filter(t => t.jenis === 'Pemasukan');
+  const ExpenseTransactions = transactions.filter(t => t.jenis === 'Pengeluaran');
+  const totalIncomeTransactions = IncomeTransactions.length;
+  const totalExpenseTransactions = ExpenseTransactions.length;
+  const TabunganReport = transactions.filter(t => t.kategori === 'Tabungan').reduce((total, transaksi) => total + transaksi.nominal, 0);
 
   return {
     transactions,
@@ -151,7 +181,11 @@ const getTransactionSummary = async (userId) => {
     ExpenseTransactions,
     totalIncomeTransactions,
     totalExpenseTransactions,
-    TabunganReport
+    TabunganReport,
+    filters: {
+      month: month || '',
+      search: search || ''
+    }
   };
 };
 
@@ -452,7 +486,8 @@ app.get('/laporan', async (req, res) => {
 //route transaksi
 app.get('/transaksi', async(req, res) => {
   try {
-    const summary = await getTransactionSummary(req.session.user.id);
+    const { month, search } = req.query;
+    const summary = await getTransactionSummary(req.session.user.id, { month, search });
 
     res.render('transaksi', {
       layout: 'layouts/main-layout',
@@ -462,6 +497,8 @@ app.get('/transaksi', async(req, res) => {
     });
   } catch (error) {
     console.error('Error fetching transactions:', error);
+    const now = new Date();
+    const currentMonth = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
     res.render('transaksi', {
       layout: 'layouts/main-layout',
       nama: 'Zul Arsyl',
@@ -471,7 +508,8 @@ app.get('/transaksi', async(req, res) => {
       totalExpense: 0,
       totalTransactions: 0,
       balance: 0,
-      currenMonth
+      currentMonth,
+      filters: { month: '', search: '' }
     });
   }
 });
