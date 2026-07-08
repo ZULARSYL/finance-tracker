@@ -358,14 +358,17 @@
                     Transaksi Terbaru
                 </h5>
 
-                <a href="#" class="text-decoration-none">
+                <button
+                    class="btn btn-sm btn-outline-success view-detail-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#SemuaTransaksiModal">
                     Lihat Semua
-                </a>
+                </button>
 
             </div>
             <% if (transactions.length > 0) { %>
                 <div class="transaction-item">
-                    <% transactions.forEach(transaction => { %>
+                    <% transactions.slice(0, 5).forEach(transaction => { %>
                         <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
                             <div>
                                 <strong><%= transaction.catatan %></strong>
