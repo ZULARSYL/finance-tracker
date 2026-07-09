@@ -5,6 +5,20 @@
 
 <meta charset="UTF-8">
 
+<!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom CSS -->
+    <!-- <link rel="stylesheet" href="/style.css"> -->
 <style>
 
 body{
@@ -29,13 +43,174 @@ th,td{
 
 }
 
+.report-card{
+    background:#fff;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.report-icon{
+    width:60px;
+    height:60px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    margin-bottom:15px;
+}
+
+.income-icon{
+    background:#EAF8EC;
+    color:#0A5C15;
+}
+
+.expense-icon{
+    background:#FDECEC;
+    color:#dc3545;
+}
+
+.saving-icon{
+    background:#EEF4FF;
+    color:#0d6efd;
+}
+
+.budget-icon{
+    background:#FFF6DD;
+    color:#ffc107;
+}
+
+.btn-report{
+    background:#0A5C15;
+    color:white;
+    border:none;
+    border-radius:12px;
+}
+
+.btn-report:hover{
+    background:#128D24;
+    color:white;
+}
+
+.transaction-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 0;
+    border-bottom:1px solid #f1f1f1;
+}
+
+.transaction-item:last-child{
+    border-bottom:none;
+}
+
+.progress{
+    height:12px;
+    border-radius:50px;
+    background:#eef2f3;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    border-radius:50px;
+    transition: width 0.3s ease;
+}
+
+.budget-section-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.budget-item{
+    margin-bottom:25px;
+}
+
+.budget-label{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+    font-size:14px;
+    font-weight:500;
+}
+
+.budget-percentage{
+    display:inline-block;
+    background:#f0f0f0;
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:12px;
+    color:#666;
+}
+
+#financeChart {
+    max-height: 400px;
+    width: 100% !important;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.chart-header h5 {
+    color: #1a1a1a;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #0A5C15;
+}
+
+.chart-header p {
+    color: #888;
+    font-size: 13px;
+    margin: 6px 0 0 32px;
+}
+
+.chart-header .view-details {
+    background: #f0f0f0;
+    color: #0A5C15;
+    border: 1px solid #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chart-header .view-details:hover {
+    background: #0A5C15;
+    color: #fff;
+    border-color: #0A5C15;
+}
 </style>
 
 </head>
 
 <body>
 
-<h2>Laporan Keuangan Bulanan</h2>
+<h2>Laporan Keuangan Bulan <%= filters.month %></h2>
+
+
 
 <h3>Ringkasan</h3>
 
@@ -67,6 +242,121 @@ th,td{
 
 </table>
 
+<div class="report-card mt-4">
+
+        <div class="budget-section-title">
+            <i class="bi bi-pie-chart" style="font-size:24px; color:#0A5C15;"></i>
+            <h5 class="fw-bold mb-0">
+                Analisis Budget Anda
+            </h5>
+        </div>
+
+        <!-- INCOME vs EXPENSE ANALYSIS -->
+        <div class="budget-item mb-5 p-3 rounded" style="background:#f8f9fa;">
+            <div class="budget-label">
+                <span>
+                    <i class="bi bi-graph-up text-success me-2"></i>
+                    Perbandingan Pemasukan & Pengeluaran
+                </span>
+                <span class="budget-percentage">
+                    <%= progress_pengeluaran.toFixed(1) %>%
+                </span>
+            </div>
+            <small class="text-muted d-block mb-2">
+                Rp <%= totalExpense.toLocaleString('id-ID') %> dari Rp <%= totalIncome.toLocaleString('id-ID') %>
+            </small>
+            <div class="progress" style="height:16px;">
+                <div class="progress-bar bg-danger" style="width: <%= progress_pengeluaran %>%"></div>
+            </div>
+        </div>
+
+        <!-- BUDGET ALLOCATION 50:30:20 -->
+        <div style="margin-bottom:30px;">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-percent"></i> Alokasi Budget <%= ratioPrimer %> : <%= ratioSekunder %> : <%= ratioTabungan %>
+            </h6>
+
+            <!-- Primer (50%) -->
+            <div class="budget-item">
+                <div class="budget-label">
+                    <span>
+                        <span class="badge bg-success"><%= ratioPrimer %>%</span>
+                        Primer (Kebutuhan)
+                    </span>
+                    <span class="budget-percentage">
+                        <%= progressPrimerPercent.toFixed(1) %>%
+                    </span>
+                </div>
+                <small class="text-muted d-block mb-2">
+                    Rp <%= used.primer.toLocaleString('id-ID') %> / Rp <%= allocation.primer.toLocaleString('id-ID') %>
+                </small>
+                <div class="progress">
+                    <div class="progress-bar bg-success" style="width: <%= progressPrimerPercent || 0 %>%"></div>
+                </div>
+            </div>
+
+            <!-- Sekunder (30%) -->
+            <div class="budget-item">
+                <div class="budget-label">
+                    <span>
+                        <span class="badge bg-warning"><%= ratioSekunder %>%</span>
+                        Sekunder (Keinginan)
+                    </span>
+                    <span class="budget-percentage">
+                        <%= progressSekunderPercent.toFixed(1) %>%
+                    </span>
+                </div>
+                <small class="text-muted d-block mb-2">
+                    Rp <%= used.sekunder.toLocaleString('id-ID') %> / Rp <%= allocation.sekunder.toLocaleString('id-ID') %>
+                </small>
+                <div class="progress">
+                    <div class="progress-bar bg-warning" style="width: <%= progressSekunderPercent || 0 %>%"></div>
+                </div>
+            </div>
+
+            <!-- Tabungan (20%) -->
+            <div class="budget-item">
+                <div class="budget-label">
+                    <span>
+                        <span class="badge bg-primary"><%= ratioTabungan %>%</span>
+                        Tabungan & Investasi
+                    </span>
+                    <span class="budget-percentage">
+                        <%= progressTabunganPercent.toFixed(1) %>%
+                    </span>
+                </div>
+                <small class="text-muted d-block mb-2">
+                    Rp <%= used.tabungan.toLocaleString('id-ID') %> / Rp <%= allocation.tabungan.toLocaleString('id-ID') %>
+                </small>
+                <div class="progress">
+                    <div class="progress-bar bg-primary" style="width: <%= progressTabunganPercent || 0 %>%"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- STATUS & TIPS -->
+        <div class="alert alert-info border-0 rounded" role="alert">
+            <strong>
+                <i class="bi bi-lightbulb me-2"></i>
+                Saran untuk Anda:
+            </strong>
+            <ul class="mb-0 mt-2">
+                <li><% if(progressPrimerPercent > 100) { %>
+                    Pengeluaran Primer Anda melebihi budget yang dialokasikan. Pertimbangkan untuk mengurangi pengeluaran kebutuhan.
+                <% } else { %>
+                    Pengeluaran Primer Anda masih dalam batas wajar.
+                <% } %></li>
+                <li><% if(progressTabunganPercent < 20) { %>
+                    Tabungan Anda masih kurang dari target 20%. Tingkatkan porsi tabungan Anda.
+                <% } else { %>
+                    Tabungan Anda sudah mencapai atau melampaui target 20%.
+                <% } %></li>
+            </ul>
+        </div>
+
+    </div>
 </body>
 
 </html>
+

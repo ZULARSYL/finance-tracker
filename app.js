@@ -840,14 +840,25 @@ app.post('/debt/delete/:id', async (req, res) => {
 //Laporan export
 app.get('/laporan/export', async (req, res) => {
   try {
-
     const { month } = req.query;
+    let transactionFilter = {
+    user: req.session.user.id
+    };
 
+    if (month) {
+      const start = new Date(month + "-01");
+      const end = new Date(start);
+      end.setMonth(end.getMonth() + 1);
+      transactionFilter.tanggal = {
+          $gte: start,
+          $lt: end
+      };
+    }
     // Ambil data
     const [settingsDoc, goalDoc, transactions] = await Promise.all([
       BudgetSetting.findOne({ user: req.session.user.id }),
       GoalSetting.findOne({ user: req.session.user.id }),
-      Transactions.find({ user: req.session.user.id }).sort({ tanggal: -1 })
+      Transactions.find(transactionFilter).sort({tanggal:-1})
     ]);
 
     const budgetSetting = settingsDoc || {
@@ -870,97 +881,77 @@ app.get('/laporan/export', async (req, res) => {
 
     // Render EJS menjadi HTML
     app.render(
-      'laporan-pdf',
+    "laporan-pdf",
       {
-        layout: false,
-
+        layout:false,
+        month,
+        currentMonthLabel:summary2.currentMonthLabel,
+        transactions,
         ...summary,
-
-        ratios: summary2.ratios,
-
-        allocation: summary2.allocation,
-
-        used: summary2.used,
-
-        progressPrimerPercent: summary2.progress.primer,
-
-        progressSekunderPercent: summary2.progress.sekunder,
-
-        progressTabunganPercent: summary2.progress.tabungan,
-
+        ratios:summary2.ratios,
+        allocation:summary2.allocation,
+        used:summary2.used,
+        progressPrimerPercent:summary2.progress.primer,
+        progressSekunderPercent:summary2.progress.sekunder,
+        progressTabunganPercent:summary2.progress.tabungan,
         ratioPrimer,
-
         ratioSekunder,
-
-        ratioTabungan
-
+        ratioTabungan,
+        insight:summary2.insight,
+        goalPercent:summary2.goalPercent,
+        goalCurrent:summary2.goalCurrent,
+        goalTarget:summary2.goalTarget,
+        filters: {
+          month: month || ''
+        }
       },
       async (err, html) => {
-
         if (err) {
-          console.log(err);
-          return res.status(500).send("Gagal membuat PDF");
+            console.error(err);
+            return res.status(500).send(err.message);
+        }
+        try {
+            const browser = await puppeteer.launch({
+                headless: true
+            });
+            const page = await browser.newPage();
+            await page.setContent(html, {
+                waitUntil: "domcontentloaded"
+            });
+            const pdf = await page.pdf({
+                format: "A4",
+                printBackground: true,
+                margin: {
+                    top: "15mm",
+                    bottom: "15mm",
+                    left: "15mm",
+                    right: "15mm"
+                }
+            });
+            await browser.close();
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader(
+                "Content-Disposition",
+                `attachment; filename=Laporan-${month || "bulan-ini"}.pdf`
+            );
+
+            return res.end(pdf);
+
+        } catch (error) {
+
+            console.error(error);
+
+            return res.status(500).send(error.message);
+
         }
 
-        console.log(html);
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
-        });
-
-        const page = await browser.newPage();
-
-        await page.setContent(html, {
-          waitUntil: "networkidle0"
-        });
-
-        const pdf = await page.pdf({
-
-          format: "A4",
-
-          printBackground: true,
-
-          margin: {
-            top: "20px",
-            bottom: "20px",
-            left: "20px",
-            right: "20px"
-          }
-
-        });
-
-        await browser.close();
-
-        res.set({
-          "Content-Type": "application/pdf",
-          "Content-Disposition":
-            `attachment; filename=Laporan-${month || "bulan-ini"}.pdf`
-        });
-
-        const fs = require("fs");
-
-        fs.writeFileSync("laporan-test.pdf", pdf);
-
-        console.log("PDF berhasil dibuat");
-        res.writeHead(200, {
-            "Content-Type": "application/pdf",
-            "Content-Length": pdf.length,
-            "Content-Disposition":
-                `attachment; filename=laporan.pdf`
-        });
-
-        res.end(pdf);
-      }
+    }
     );
 
   } catch (err) {
-
     console.log(err);
-
     res.status(500).send("Gagal membuat PDF");
-
   }
-
 });
 
 // start server with simple retry on EADDRINUSE (try next port)
