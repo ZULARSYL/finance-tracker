@@ -836,13 +836,12 @@ app.post('/debt/delete/:id', async (req, res) => {
   }
 });
 
-
-//Laporan export
+//lapoaran export
 app.get('/laporan/export', async (req, res) => {
   try {
     const { month } = req.query;
     let transactionFilter = {
-    user: req.session.user.id
+      user: req.session.user.id
     };
 
     if (month) {
@@ -850,16 +849,21 @@ app.get('/laporan/export', async (req, res) => {
       const end = new Date(start);
       end.setMonth(end.getMonth() + 1);
       transactionFilter.tanggal = {
-          $gte: start,
-          $lt: end
+        $gte: start,
+        $lt: end
       };
     }
+    
     // Ambil data
     const [settingsDoc, goalDoc, transactions] = await Promise.all([
       BudgetSetting.findOne({ user: req.session.user.id }),
       GoalSetting.findOne({ user: req.session.user.id }),
-      Transactions.find(transactionFilter).sort({tanggal:-1})
+      Transactions.find(transactionFilter).sort({ tanggal: -1 })
     ]);
+
+    // DEBUG: Log untuk melihat data transaksi
+    console.log('Total transaksi:', transactions.length);
+    console.log('Sample transaksi:', transactions.slice(0, 3));
 
     const budgetSetting = settingsDoc || {
       ratios: DEFAULT_RATIOS
@@ -879,73 +883,117 @@ app.get('/laporan/export', async (req, res) => {
     const ratioSekunder = budgetSetting.ratios.sekunder;
     const ratioTabungan = budgetSetting.ratios.tabungan;
 
+    // === PIE CHART DATA: Kategori Pemasukan & Pengeluaran ===
+    const incomeCategories = {};
+    const expenseCategories = {};
+    
+    transactions.forEach(trans => {
+      // Pastikan menggunakan field yang benar
+      const jenis = trans.jenis || trans.type || trans.tipe || '';
+      const kategori = trans.kategori || trans.category || trans.kategory || 'Lainnya';
+      const jumlah = trans.jumlah || trans.amount || trans.nominal || 0;
+      
+      console.log(`Transaksi: jenis=${jenis}, kategori=${kategori}, jumlah=${jumlah}`);
+      
+      if (jenis.toLowerCase() === 'pemasukan' || jenis.toLowerCase() === 'income') {
+        incomeCategories[kategori] = (incomeCategories[kategori] || 0) + jumlah;
+      } else if (jenis.toLowerCase() === 'pengeluaran' || jenis.toLowerCase() === 'expense') {
+        expenseCategories[kategori] = (expenseCategories[kategori] || 0) + jumlah;
+      }
+    });
+
+    // Konversi ke array untuk chart
+    const incomeCategoryData = Object.entries(incomeCategories).map(([name, amount]) => ({
+      name: name,
+      amount: amount
+    }));
+
+    const expenseCategoryData = Object.entries(expenseCategories).map(([name, amount]) => ({
+      name: name,
+      amount: amount
+    }));
+
+    // DEBUG: Log hasil pengelompokan
+    console.log('Income Categories:', incomeCategoryData);
+    console.log('Expense Categories:', expenseCategoryData);
+
+    // Warna untuk chart
+    const colors = [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+      '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF',
+      '#4DC9F6', '#F67019', '#537BC4', '#ACC236'
+    ];
+
     // Render EJS menjadi HTML
     app.render(
-    "laporan-pdf",
+      "laporan-pdf",
       {
-        layout:false,
+        layout: false,
         month,
-        currentMonthLabel:summary2.currentMonthLabel,
+        currentMonthLabel: summary2.currentMonthLabel,
         transactions,
         ...summary,
-        ratios:summary2.ratios,
-        allocation:summary2.allocation,
-        used:summary2.used,
-        progressPrimerPercent:summary2.progress.primer,
-        progressSekunderPercent:summary2.progress.sekunder,
-        progressTabunganPercent:summary2.progress.tabungan,
+        ratios: summary2.ratios,
+        allocation: summary2.allocation,
+        used: summary2.used,
+        progressPrimerPercent: summary2.progress.primer,
+        progressSekunderPercent: summary2.progress.sekunder,
+        progressTabunganPercent: summary2.progress.tabungan,
         ratioPrimer,
         ratioSekunder,
         ratioTabungan,
-        insight:summary2.insight,
-        goalPercent:summary2.goalPercent,
-        goalCurrent:summary2.goalCurrent,
-        goalTarget:summary2.goalTarget,
+        insight: summary2.insight,
+        goalPercent: summary2.goalPercent,
+        goalCurrent: summary2.goalCurrent,
+        goalTarget: summary2.goalTarget,
         filters: {
           month: month || ''
-        }
+        },
+        // Data untuk pie chart
+        incomeCategoryData: incomeCategoryData,
+        expenseCategoryData: expenseCategoryData,
+        colors: colors,
+        // Tambahkan total untuk debugging
+        hasIncomeData: incomeCategoryData.length > 0,
+        hasExpenseData: expenseCategoryData.length > 0
       },
       async (err, html) => {
         if (err) {
-            console.error(err);
-            return res.status(500).send(err.message);
+          console.error(err);
+          return res.status(500).send(err.message);
         }
         try {
-            const browser = await puppeteer.launch({
-                headless: true
-            });
-            const page = await browser.newPage();
-            await page.setContent(html, {
-                waitUntil: "domcontentloaded"
-            });
-            const pdf = await page.pdf({
-                format: "A4",
-                printBackground: true,
-                margin: {
-                    top: "15mm",
-                    bottom: "15mm",
-                    left: "15mm",
-                    right: "15mm"
-                }
-            });
-            await browser.close();
-            res.setHeader("Content-Type", "application/pdf");
-            res.setHeader(
-                "Content-Disposition",
-                `attachment; filename=Laporan-${month || "bulan-ini"}.pdf`
-            );
+          const browser = await puppeteer.launch({
+            headless: true
+          });
+          const page = await browser.newPage();
+          await page.setContent(html, {
+            waitUntil: "domcontentloaded"
+          });
+          const pdf = await page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: {
+              top: "15mm",
+              bottom: "15mm",
+              left: "15mm",
+              right: "15mm"
+            }
+          });
+          await browser.close();
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=Laporan-${month || "bulan-ini"}.pdf`
+          );
 
-            return res.end(pdf);
+          return res.end(pdf);
 
         } catch (error) {
-
-            console.error(error);
-
-            return res.status(500).send(error.message);
-
+          console.error(error);
+          return res.status(500).send(error.message);
         }
-
-    }
+      }
     );
 
   } catch (err) {

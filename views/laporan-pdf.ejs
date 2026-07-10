@@ -2,10 +2,10 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-
-<!-- Bootstrap -->
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
@@ -14,236 +14,365 @@
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom CSS -->
-    <!-- <link rel="stylesheet" href="/style.css"> -->
-<style>
 
-body{
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
 
-    font-family:Arial;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+        }
 
-}
+        .report-header {
+            background: linear-gradient(135deg, #0A5C15 0%, #128D24 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 24px;
+            margin-bottom: 30px;
+        }
 
-table{
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-    width:100%;
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
 
-    border-collapse:collapse;
+        .report-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .05);
+        }
 
-}
+        .report-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
 
-th,td{
+        .income-icon {
+            background: #EAF8EC;
+            color: #0A5C15;
+        }
 
-    border:1px solid #ccc;
+        .expense-icon {
+            background: #FDECEC;
+            color: #dc3545;
+        }
 
-    padding:8px;
+        .saving-icon {
+            background: #EEF4FF;
+            color: #0d6efd;
+        }
 
-}
+        .budget-icon {
+            background: #FFF6DD;
+            color: #ffc107;
+        }
 
-.report-card{
-    background:#fff;
-    border-radius:24px;
-    padding:24px;
-    box-shadow:0 4px 20px rgba(0,0,0,.05);
-}
+        .btn-report {
+            background: #0A5C15;
+            color: white;
+            border: none;
+            border-radius: 12px;
+        }
 
-.report-icon{
-    width:60px;
-    height:60px;
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    margin-bottom:15px;
-}
+        .btn-report:hover {
+            background: #128D24;
+            color: white;
+        }
 
-.income-icon{
-    background:#EAF8EC;
-    color:#0A5C15;
-}
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
 
-.expense-icon{
-    background:#FDECEC;
-    color:#dc3545;
-}
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
 
-.saving-icon{
-    background:#EEF4FF;
-    color:#0d6efd;
-}
+        .progress {
+            height: 12px;
+            border-radius: 50px;
+            background: #eef2f3;
+            overflow: hidden;
+        }
 
-.budget-icon{
-    background:#FFF6DD;
-    color:#ffc107;
-}
+        .progress-bar {
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.3s ease;
+        }
 
-.btn-report{
-    background:#0A5C15;
-    color:white;
-    border:none;
-    border-radius:12px;
-}
+        .budget-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-.btn-report:hover{
-    background:#128D24;
-    color:white;
-}
+        .budget-item {
+            margin-bottom: 25px;
+        }
 
-.transaction-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:18px 0;
-    border-bottom:1px solid #f1f1f1;
-}
+        .budget-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
 
-.transaction-item:last-child{
-    border-bottom:none;
-}
+        .budget-percentage {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
 
-.progress{
-    height:12px;
-    border-radius:50px;
-    background:#eef2f3;
-    overflow:hidden;
-}
+        .chart-container {
+            position: relative;
+            width: 100%;
+            background: #fff;
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
 
-.progress-bar{
-    height:100%;
-    border-radius:50px;
-    transition: width 0.3s ease;
-}
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
 
-.budget-section-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:20px;
-}
+        .chart-header h5 {
+            color: #1a1a1a;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.budget-item{
-    margin-bottom:25px;
-}
+        .chart-header p {
+            color: #888;
+            font-size: 13px;
+            margin: 6px 0 0 32px;
+        }
 
-.budget-label{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:8px;
-    font-size:14px;
-    font-weight:500;
-}
+        .chart-header .view-details {
+            background: #f0f0f0;
+            color: #0A5C15;
+            border: 1px solid #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-.budget-percentage{
-    display:inline-block;
-    background:#f0f0f0;
-    padding:2px 8px;
-    border-radius:4px;
-    font-size:12px;
-    color:#666;
-}
+        .chart-header .view-details:hover {
+            background: #0A5C15;
+            color: #fff;
+            border-color: #0A5C15;
+        }
 
-#financeChart {
-    max-height: 400px;
-    width: 100% !important;
-}
+        .chart-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
 
-.chart-container {
-    position: relative;
-    width: 100%;
-    background: #fff;
-    border-radius: 24px;
-    padding: 28px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
+        .chart-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f0f0f0;
+        }
 
-.chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
-}
+        .chart-box h6 {
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
 
-.chart-header h5 {
-    color: #1a1a1a;
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #0A5C15;
-}
+        .chart-box .chart-canvas-wrapper {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
 
-.chart-header p {
-    color: #888;
-    font-size: 13px;
-    margin: 6px 0 0 32px;
-}
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
 
-.chart-header .view-details {
-    background: #f0f0f0;
-    color: #0A5C15;
-    border: 1px solid #e0e0e0;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+        .stat-card {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+        }
 
-.chart-header .view-details:hover {
-    background: #0A5C15;
-    color: #fff;
-    border-color: #0A5C15;
-}
-</style>
+        .stat-card .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
 
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .text-success-custom {
+            color: #0A5C15;
+        }
+
+        @media print {
+            .chart-box {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<h2>Laporan Keuangan Bulan <%= filters.month %></h2>
+    <!-- HEADER -->
+    <div class="report-header">
+        <h2 class="fw-bold mb-2">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            Laporan Keuangan
+        </h2>
+        <p class="mb-0 opacity-75">
+            <i class="bi bi-calendar3 me-2"></i>
+            <%
+            const periode = filters.month ? new Date(filters.month + '-01') : new Date();
+            %>
 
+            Periode:
+            <%= periode.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) %>
+        </p>
+    </div>
 
+    <!-- SUMMARY STATS -->
+    <div class="summary-stats">
+        <div class="stat-card">
+            <div class="stat-value text-success-custom">
+                Rp <%= totalIncome.toLocaleString("id-ID") %>
+            </div>
+            <div class="stat-label">
+                <i class="bi bi-arrow-up-circle-fill text-success me-1"></i>
+                Total Pemasukan
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value text-danger">
+                Rp <%= totalExpense.toLocaleString("id-ID") %>
+            </div>
+            <div class="stat-label">
+                <i class="bi bi-arrow-down-circle-fill text-danger me-1"></i>
+                Total Pengeluaran
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value text-primary">
+                Rp <%= balance.toLocaleString("id-ID") %>
+            </div>
+            <div class="stat-label">
+                <i class="bi bi-wallet2 me-1"></i>
+                Saldo Akhir
+            </div>
+        </div>
+    </div>
 
-<h3>Ringkasan</h3>
+    <!-- PIE CHARTS SECTION -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div>
+                <h5 class="text-success-custom">
+                    <i class="bi bi-pie-chart-fill"></i>
+                    Analisis Kategori Transaksi
+                </h5>
+                <p>Distribusi pemasukan dan pengeluaran berdasarkan kategori</p>
+            </div>
+            <span class="view-details">
+                <i class="bi bi-calendar3 me-1"></i>
+                <%= periode.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) %>
+            </span>
+        </div>
 
-<table>
+        <div class="chart-wrapper">
+            <!-- PIE CHART 1: PEMASUKAN -->
+            <div class="chart-box">
+                <h6>
+                    <i class="bi bi-arrow-up-circle-fill text-success me-2"></i>
+                    Pemasukan per Kategori
+                </h6>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="incomePieChart"></canvas>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        Total: Rp <%= totalIncome.toLocaleString("id-ID") %>
+                    </small>
+                </div>
+            </div>
 
-<tr>
+            <!-- PIE CHART 2: PENGELUARAN -->
+            <div class="chart-box">
+                <h6>
+                    <i class="bi bi-arrow-down-circle-fill text-danger me-2"></i>
+                    Pengeluaran per Kategori
+                </h6>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="expensePieChart"></canvas>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        Total: Rp <%= totalExpense.toLocaleString("id-ID") %>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<td>Total Pemasukan</td>
-
-<td>Rp <%= totalIncome.toLocaleString("id-ID") %></td>
-
-</tr>
-
-<tr>
-
-<td>Total Pengeluaran</td>
-
-<td>Rp <%= totalExpense.toLocaleString("id-ID") %></td>
-
-</tr>
-
-<tr>
-
-<td>Saldo</td>
-
-<td>Rp <%= balance.toLocaleString("id-ID") %></td>
-
-</tr>
-
-</table>
-
-<div class="report-card mt-4">
-
+    <!-- REPORT CARD (BUDGET ANALYSIS) -->
+    <div class="report-card">
         <div class="budget-section-title">
             <i class="bi bi-pie-chart" style="font-size:24px; color:#0A5C15;"></i>
             <h5 class="fw-bold mb-0">
@@ -259,80 +388,79 @@ th,td{
                     Perbandingan Pemasukan & Pengeluaran
                 </span>
                 <span class="budget-percentage">
-                    <%= progress_pengeluaran.toFixed(1) %>%
+                    <%= typeof progress_pengeluaran !== 'undefined' ? progress_pengeluaran.toFixed(1) : 0 %>%
                 </span>
             </div>
             <small class="text-muted d-block mb-2">
-                Rp <%= totalExpense.toLocaleString('id-ID') %> dari Rp <%= totalIncome.toLocaleString('id-ID') %>
+                Rp <%= typeof totalExpense !== 'undefined' ? totalExpense.toLocaleString('id-ID') : 0 %> dari Rp <%= typeof totalIncome !== 'undefined' ? totalIncome.toLocaleString('id-ID') : 0 %>
             </small>
             <div class="progress" style="height:16px;">
-                <div class="progress-bar bg-danger" style="width: <%= progress_pengeluaran %>%"></div>
+                <div class="progress-bar bg-danger" style="width: <%= typeof progress_pengeluaran !== 'undefined' ? progress_pengeluaran : 0 %>%"></div>
             </div>
         </div>
 
         <!-- BUDGET ALLOCATION 50:30:20 -->
         <div style="margin-bottom:30px;">
             <h6 class="fw-bold mb-3">
-                <i class="bi bi-percent"></i> Alokasi Budget <%= ratioPrimer %> : <%= ratioSekunder %> : <%= ratioTabungan %>
+                <i class="bi bi-percent"></i> Alokasi Budget <%= ratioPrimer || 50 %> : <%= ratioSekunder || 30 %> : <%= ratioTabungan || 20 %>
             </h6>
 
-            <!-- Primer (50%) -->
+            <!-- Primer -->
             <div class="budget-item">
                 <div class="budget-label">
                     <span>
-                        <span class="badge bg-success"><%= ratioPrimer %>%</span>
+                        <span class="badge bg-success"><%= ratioPrimer || 50 %>%</span>
                         Primer (Kebutuhan)
                     </span>
                     <span class="budget-percentage">
-                        <%= progressPrimerPercent.toFixed(1) %>%
+                        <%= typeof progressPrimerPercent !== 'undefined' ? progressPrimerPercent.toFixed(1) : 0 %>%
                     </span>
                 </div>
                 <small class="text-muted d-block mb-2">
-                    Rp <%= used.primer.toLocaleString('id-ID') %> / Rp <%= allocation.primer.toLocaleString('id-ID') %>
+                    Rp <%= typeof used !== 'undefined' && used.primer ? used.primer.toLocaleString('id-ID') : 0 %> / Rp <%= typeof allocation !== 'undefined' && allocation.primer ? allocation.primer.toLocaleString('id-ID') : 0 %>
                 </small>
                 <div class="progress">
-                    <div class="progress-bar bg-success" style="width: <%= progressPrimerPercent || 0 %>%"></div>
+                    <div class="progress-bar bg-success" style="width: <%= typeof progressPrimerPercent !== 'undefined' ? progressPrimerPercent || 0 : 0 %>%"></div>
                 </div>
             </div>
 
-            <!-- Sekunder (30%) -->
+            <!-- Sekunder -->
             <div class="budget-item">
                 <div class="budget-label">
                     <span>
-                        <span class="badge bg-warning"><%= ratioSekunder %>%</span>
+                        <span class="badge bg-warning"><%= ratioSekunder || 30 %>%</span>
                         Sekunder (Keinginan)
                     </span>
                     <span class="budget-percentage">
-                        <%= progressSekunderPercent.toFixed(1) %>%
+                        <%= typeof progressSekunderPercent !== 'undefined' ? progressSekunderPercent.toFixed(1) : 0 %>%
                     </span>
                 </div>
                 <small class="text-muted d-block mb-2">
-                    Rp <%= used.sekunder.toLocaleString('id-ID') %> / Rp <%= allocation.sekunder.toLocaleString('id-ID') %>
+                    Rp <%= typeof used !== 'undefined' && used.sekunder ? used.sekunder.toLocaleString('id-ID') : 0 %> / Rp <%= typeof allocation !== 'undefined' && allocation.sekunder ? allocation.sekunder.toLocaleString('id-ID') : 0 %>
                 </small>
                 <div class="progress">
-                    <div class="progress-bar bg-warning" style="width: <%= progressSekunderPercent || 0 %>%"></div>
+                    <div class="progress-bar bg-warning" style="width: <%= typeof progressSekunderPercent !== 'undefined' ? progressSekunderPercent || 0 : 0 %>%"></div>
                 </div>
             </div>
 
-            <!-- Tabungan (20%) -->
+            <!-- Tabungan -->
             <div class="budget-item">
                 <div class="budget-label">
                     <span>
-                        <span class="badge bg-primary"><%= ratioTabungan %>%</span>
+                        <span class="badge bg-primary"><%= ratioTabungan || 20 %>%</span>
                         Tabungan & Investasi
                     </span>
                     <span class="budget-percentage">
-                        <%= progressTabunganPercent.toFixed(1) %>%
+                        <%= typeof progressTabunganPercent !== 'undefined' ? progressTabunganPercent.toFixed(1) : 0 %>%
                     </span>
                 </div>
                 <small class="text-muted d-block mb-2">
-                    Rp <%= used.tabungan.toLocaleString('id-ID') %> / Rp <%= allocation.tabungan.toLocaleString('id-ID') %>
+                    Rp <%= typeof used !== 'undefined' && used.tabungan ? used.tabungan.toLocaleString('id-ID') : 0 %> / Rp <%= typeof allocation !== 'undefined' && allocation.tabungan ? allocation.tabungan.toLocaleString('id-ID') : 0 %>
                 </small>
                 <div class="progress">
-                    <div class="progress-bar bg-primary" style="width: <%= progressTabunganPercent || 0 %>%"></div>
+                    <div class="progress-bar bg-primary" style="width: <%= typeof progressTabunganPercent !== 'undefined' ? progressTabunganPercent || 0 : 0 %>%"></div>
                 </div>
             </div>
-
         </div>
 
         <!-- STATUS & TIPS -->
@@ -342,21 +470,159 @@ th,td{
                 Saran untuk Anda:
             </strong>
             <ul class="mb-0 mt-2">
-                <li><% if(progressPrimerPercent > 100) { %>
-                    Pengeluaran Primer Anda melebihi budget yang dialokasikan. Pertimbangkan untuk mengurangi pengeluaran kebutuhan.
-                <% } else { %>
-                    Pengeluaran Primer Anda masih dalam batas wajar.
-                <% } %></li>
-                <li><% if(progressTabunganPercent < 20) { %>
-                    Tabungan Anda masih kurang dari target 20%. Tingkatkan porsi tabungan Anda.
-                <% } else { %>
-                    Tabungan Anda sudah mencapai atau melampaui target 20%.
-                <% } %></li>
+                <li>
+                    <% if(typeof progressPrimerPercent !== 'undefined' && progressPrimerPercent > 100) { %>
+                        Pengeluaran Primer Anda melebihi budget yang dialokasikan. Pertimbangkan untuk mengurangi pengeluaran kebutuhan.
+                    <% } else { %>
+                        Pengeluaran Primer Anda masih dalam batas wajar.
+                    <% } %>
+                </li>
+                <li>
+                    <% if(typeof progressTabunganPercent !== 'undefined' && progressTabunganPercent < 20) { %>
+                        Tabungan Anda masih kurang dari target 20%. Tingkatkan porsi tabungan Anda.
+                    <% } else { %>
+                        Tabungan Anda sudah mencapai atau melampaui target 20%.
+                    <% } %>
+                </li>
             </ul>
         </div>
-
     </div>
+
+<!-- CHART SCRIPTS -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== DEBUG PIE CHART ===');
+        
+        // Data dari server dengan fallback
+        const incomeData = <%- JSON.stringify(incomeCategoryData || []) %>;
+        const expenseData = <%- JSON.stringify(expenseCategoryData || []) %>;
+        const colors = <%- JSON.stringify(colors || []) %>;
+        
+        console.log('Income Data:', incomeData);
+        console.log('Expense Data:', expenseData);
+        console.log('Colors:', colors);
+
+        // Fungsi untuk generate warna jika data kosong
+        function getColors(data, colors) {
+            if (!data || data.length === 0) return [];
+            return data.map((_, index) => colors[index % colors.length]);
+        }
+
+        // Fungsi untuk membuat chart dengan data kosong
+        function createEmptyState(canvasId, message) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const wrapper = canvas.parentElement;
+            if (wrapper) {
+                wrapper.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-inbox" style="font-size: 32px;"></i>
+                        <p class="mt-2 mb-0">${message}</p>
+                        <small class="text-muted">Belum ada data transaksi</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Fungsi untuk membuat chart
+        function createPieChart(canvasId, data, label, total) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.error(`Canvas dengan id ${canvasId} tidak ditemukan`);
+                return;
+            }
+
+            // Validasi data
+            if (!data || data.length === 0) {
+                console.log(`Tidak ada data untuk ${label}`);
+                createEmptyState(canvasId, `Tidak ada data ${label.toLowerCase()}`);
+                return;
+            }
+
+            // Filter data yang amount > 0
+            const filteredData = data.filter(item => item.amount > 0);
+            
+            if (filteredData.length === 0) {
+                console.log(`Semua data ${label} bernilai 0`);
+                createEmptyState(canvasId, `Tidak ada data ${label.toLowerCase()} yang valid`);
+                return;
+            }
+
+            const chartColors = getColors(filteredData, colors);
+            const totalAmount = filteredData.reduce((sum, item) => sum + item.amount, 0);
+
+            console.log(`Membuat chart ${label} dengan ${filteredData.length} kategori`);
+            console.log(`Total ${label}: ${totalAmount}`);
+
+            try {
+                new Chart(canvas, {
+                    type: 'pie',
+                    data: {
+                        labels: filteredData.map(item => item.name),
+                        datasets: [{
+                            data: filteredData.map(item => item.amount),
+                            backgroundColor: chartColors,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 12,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: {
+                                        size: 11,
+                                        weight: '500'
+                                    },
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const percentage = totalAmount > 0 ? 
+                                                ((value / totalAmount) * 100).toFixed(1) : 0;
+                                            return {
+                                                text: `${label} (${percentage}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].backgroundColor[i],
+                                                pointStyle: 'circle',
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const percentage = totalAmount > 0 ? 
+                                            ((value / totalAmount) * 100).toFixed(1) : 0;
+                                        return `Rp ${value.toLocaleString('id-ID')} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '0%'
+                    }
+                });
+                console.log(`Chart ${label} berhasil dibuat`);
+            } catch (error) {
+                console.error(`Error membuat chart ${label}:`, error);
+                createEmptyState(canvasId, `Error membuat chart ${label}`);
+            }
+        }
+
+        // Buat kedua chart
+        createPieChart('incomePieChart', incomeData, 'Pemasukan', <%= totalIncome || 0 %>);
+        createPieChart('expensePieChart', expenseData, 'Pengeluaran', <%= totalExpense || 0 %>);
+    });
+</script>
+
 </body>
 
 </html>
-
